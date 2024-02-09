@@ -17,7 +17,11 @@ class SpeechDataset(Dataset):
         return targets, inputs
 
 
+
 def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, snippet_length=10, num_quantizers=4):
+
+    # Source: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
+    # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
 
     from speechtokenizer import SpeechTokenizer
     import soundfile as sf
@@ -58,8 +62,8 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, sni
     def get_files(directory):
         return [os.path.join(directory, file) for file in os.listdir(directory)]
 
-    def save_to_file(tok, filename, device):
-        outputwav = decode_tokens(tok.detach().to(device))
+    def save_to_file(tok, filename, speech_tokenizer, device):
+        outputwav = decode_tokens(tok.detach().to(device), speech_tokenizer)
         save_waveform(filename, outputwav)
 
     def save_waveform(filename, waveform):

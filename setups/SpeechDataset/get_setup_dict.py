@@ -11,7 +11,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     vocab_size = 1024
     max_seq_length = 2000
     batch_size = 16
-    val_fraction = 0.5
+    val_fraction = 0.05
 
     data_folder_path = os.path.join(datasets_path, "speech")
 
@@ -63,7 +63,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     )
 
     optimizer_hparams = dict(
-        lr=0.002,
+        lr=0.001,
         warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
         weight_decay=0.05,
         b1=0.9,
