@@ -2,7 +2,7 @@
 
 <div style="display: flex; justify-content: space-around; align-items: center;">
     <img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
-    <img src="assets/eq.png" alt="Equation" width="500px"/>
+    <img src="assets/eq.png" alt="Equation" width="400px"/>
 </div>
 
 > **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
