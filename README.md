@@ -1,6 +1,7 @@
 # GateLoop
 
-![GateLoop](assets/gate_loop.png "Selective State Space")
+<img src="assets/gate_loop.png" alt="GateLoop" width="500px"/>
+
 > **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
 > Tobias Katsch*\
 > Paper: https://arxiv.org/abs/2311.01927
