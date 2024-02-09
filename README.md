@@ -54,10 +54,10 @@ We provide 2 main modules:
   ```
   #### Two Stage Training
   - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through parallel scan. This disables the recurrent weights, allowing for much fast training compared to Transformer, GRU & LSTM.
-  - **True Recurrent Mode:** (`use_true_recurrence=True`) Can be used to train a more expressive model from a Linear Recurrent Model checkpoint. This variant introduces additional parameters such that gates also depend on previous hidden states similar to GRU & LSTM. Due to the true recurrent nature, this mode cannot be parallelized and thus is less efficient. We recommend this for finetuning from an linear recurrent checkpoint.
+  - **True Recurrent Mode:** (`use_true_recurrence=True`) Can be used to train a more expressive model from a Linear Recurrent Model checkpoint. This variant introduces additional parameters such that the inputs and gates also depend on previous hidden states similar to GRU & LSTM. Due to the true recurrent nature, this mode cannot be parallelized and thus is less efficient. We recommend this for finetuning from an linear recurrent checkpoint.
 
   #### Gate Tying
-  - **Disjoint Input & Forget gate** (`use_tied_gates=Flase`) Applies seperate projections for input- & forget gates
+  - **Disjoint Input & Forget gate** (`use_tied_gates=False`) Applies seperate projections for input- & forget gates
   - **Tied Input & Forget gate** (`use_tied_gates=True`) Ties the input and forget gate through the relation `forget_gate = 1-input_gate`.
 
 
