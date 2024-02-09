@@ -54,7 +54,7 @@ We provide 2 main modules:
   assert y.shape == (batch_size, sequence_length, d_h)
   ```
   #### Two Stage Training
-  - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through parallel scan. This disables the recurrent weights, allowing for much fast training compared to Transformer, GRU & LSTM.
+  - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through associative scan. This disables the recurrent weights, allowing for much faster training compared to Transformer, GRU & LSTM.
   - **True Recurrent Mode:** (`use_true_recurrence=True`) Can be used to train a more expressive model from a Linear Recurrent Model checkpoint. This variant introduces additional parameters such that the inputs and gates also depend on previous hidden states similar to GRU & LSTM. Due to the true recurrent nature, this mode cannot be parallelized and thus is less efficient. We recommend this for finetuning from an linear recurrent checkpoint.
 
   #### Gate Tying
