@@ -23,7 +23,7 @@ Other requirements:
 
 ## Usage
 We provide 2 main modules:
-- ### [gate_loop.py](GateLoop/gate_loop/gate_loop.py)
+- ### [gate_loop.py](gate_loop/gate_loop.py)
   A causal time mixing sequence model which can be used as a drop-in replacement for causal multi-head-attention.
   Usage:
   ```
@@ -58,7 +58,7 @@ We provide 2 main modules:
   - **Tied Input & Forget gate** (`use_tied_gates=True`) Ties the input and forget gate through the relation `forget_gate = 1-input_gate`.
 
 
-- ## [gate_loop_lm.py](GateLoop/gate_loop/language_models/gate_loop_lm.py)
+- ## [gate_loop_lm.py](gate_loop/language_models/gate_loop_lm.py)
   A causal time mixing sequence model which can be used as a drop-in replacement for causal multi-head-attention.
   Usage:
   ```
