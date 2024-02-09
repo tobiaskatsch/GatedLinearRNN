@@ -1,5 +1,5 @@
 from flax import linen as nn
-from gate_loop.base_models.channel_mixing import ChannelMixing
+from flax_gate_loop.base_models.channel_mixing import ChannelMixing
 
 class SequenceModel(nn.Module):
     n_layer: int

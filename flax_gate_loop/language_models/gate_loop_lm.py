@@ -1,7 +1,7 @@
-from gate_loop.base_models.language_model import LanguageModel
-from gate_loop.base_models.time_mixing import CausalTimeMixing
+from flax_gate_loop.base_models.language_model import LanguageModel
+from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
 from typing import Optional, Callable
-from gate_loop.gate_loop import GateLoop
+from flax_gate_loop.gate_loop import GateLoop
 from flax import linen as nn
 
 class GateLoopLM(LanguageModel):

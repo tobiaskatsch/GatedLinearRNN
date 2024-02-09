@@ -1,7 +1,7 @@
 import os
 from flax.training import train_state
 from typing import Any, Sequence, Optional, Tuple, Iterator, Dict, Callable, List
-from gate_loop.gate_loop import *
+from flax_gate_loop.gate_loop import *
 
 
 def get_home_directory():

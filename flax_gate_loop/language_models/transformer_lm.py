@@ -1,7 +1,7 @@
 from typing import Optional, Callable
-from gate_loop.base_models.language_model import LanguageModel
-from gate_loop.base_models.time_mixing import CausalTimeMixing
-from gate_loop.transformer import MultiHeadAttention
+from flax_gate_loop.base_models.language_model import LanguageModel
+from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
+from flax_gate_loop.transformer import MultiHeadAttention
 
 
 class TransformerLM(LanguageModel):

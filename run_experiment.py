@@ -2,8 +2,8 @@ import sys
 import os
 import jax
 from data.numpy_data_loader import NumpyDataLoader
-from gate_loop.language_models.gate_loop_lm import *
-from gate_loop.language_models.transformer_lm import *
+from flax_gate_loop.language_models.gate_loop_lm import *
+from flax_gate_loop.language_models.transformer_lm import *
 from setups.get_setup_dict import get_setup_dict
 from util import get_home_directory
 import ast

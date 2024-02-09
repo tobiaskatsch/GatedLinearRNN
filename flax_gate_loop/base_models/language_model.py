@@ -1,6 +1,6 @@
 from flax import linen as nn
 import jax.numpy as jnp
-from gate_loop.base_models.sequence_model import SequenceModel
+from flax_gate_loop.base_models.sequence_model import SequenceModel
 
 class LanguageModel(SequenceModel):
     n_layer: int
