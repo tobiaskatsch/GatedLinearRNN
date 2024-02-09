@@ -25,7 +25,7 @@ class SequenceModel(nn.Module):
         """
         h = []
         for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
-            h_l, x = time_mixing(x, training, (carry[l] if carry else None))
+            h_l, x = time_mixing(x, training, (carry[:, l, :] if carry else None))
             x = channel_mixing(x, training)
             h.append(h_l)
         h = jnp.stack(h, axis=1)
