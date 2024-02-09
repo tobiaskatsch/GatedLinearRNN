@@ -1,0 +1,52 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="38">
+            <item index="0" class="java.lang.String" itemvalue="pytorch_lightning" />
+            <item index="1" class="java.lang.String" itemvalue="wandb" />
+            <item index="2" class="java.lang.String" itemvalue="jax" />
+            <item index="3" class="java.lang.String" itemvalue="pytorch-lightning" />
+            <item index="4" class="java.lang.String" itemvalue="tensorflow" />
+            <item index="5" class="java.lang.String" itemvalue="scikit-learn" />
+            <item index="6" class="java.lang.String" itemvalue="optax" />
+            <item index="7" class="java.lang.String" itemvalue="einops" />
+            <item index="8" class="java.lang.String" itemvalue="orbax-checkpoint" />
+            <item index="9" class="java.lang.String" itemvalue="brotlipy" />
+            <item index="10" class="java.lang.String" itemvalue="cffi" />
+            <item index="11" class="java.lang.String" itemvalue="psycopg2" />
+            <item index="12" class="java.lang.String" itemvalue="psycopg2-binary" />
+            <item index="13" class="java.lang.String" itemvalue="astroid" />
+            <item index="14" class="java.lang.String" itemvalue="pycparser" />
+            <item index="15" class="java.lang.String" itemvalue="requests" />
+            <item index="16" class="java.lang.String" itemvalue="django-extensions" />
+            <item index="17" class="java.lang.String" itemvalue="pyOpenSSL" />
+            <item index="18" class="java.lang.String" itemvalue="mccabe" />
+            <item index="19" class="java.lang.String" itemvalue="certifi" />
+            <item index="20" class="java.lang.String" itemvalue="urllib3" />
+            <item index="21" class="java.lang.String" itemvalue="djangorestframework" />
+            <item index="22" class="java.lang.String" itemvalue="django-cors-headers" />
+            <item index="23" class="java.lang.String" itemvalue="wincertstore" />
+            <item index="24" class="java.lang.String" itemvalue="six" />
+            <item index="25" class="java.lang.String" itemvalue="phonenumbers" />
+            <item index="26" class="java.lang.String" itemvalue="wrapt" />
+            <item index="27" class="java.lang.String" itemvalue="cryptography" />
+            <item index="28" class="java.lang.String" itemvalue="typing-extensions" />
+            <item index="29" class="java.lang.String" itemvalue="toml" />
+            <item index="30" class="java.lang.String" itemvalue="win-inet-pton" />
+            <item index="31" class="java.lang.String" itemvalue="lazy-object-proxy" />
+            <item index="32" class="java.lang.String" itemvalue="django" />
+            <item index="33" class="java.lang.String" itemvalue="PySocks" />
+            <item index="34" class="java.lang.String" itemvalue="colorama" />
+            <item index="35" class="java.lang.String" itemvalue="charset-normalizer" />
+            <item index="36" class="java.lang.String" itemvalue="pytz" />
+            <item index="37" class="java.lang.String" itemvalue="idna" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

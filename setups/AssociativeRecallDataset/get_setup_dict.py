@@ -1,0 +1,87 @@
+from data.associative_recall import AssociativeRecallDataset
+from data.numpy_data_loader import NumpyDataLoader
+import torch
+import importlib
+from training.language_model_trainer import LanguageModelTrainer
+
+
+def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, datasets_path, fresh_preprocess):
+
+    vocab_size = 30
+    max_seq_length = 100
+    batch_size = 32
+    n_training_samples = 6000
+    n_val_samples = 100
+    n_test_samples = 500
+
+    train_set = AssociativeRecallDataset(vocab_size, max_seq_length, n_samples=n_training_samples, seed=seed)
+    val_set = AssociativeRecallDataset(vocab_size, max_seq_length, n_samples=n_val_samples, seed=seed+1)
+    test_set = AssociativeRecallDataset(vocab_size, max_seq_length, n_samples=n_test_samples, seed=seed+2)
+
+    vocab = train_set.vocab
+    input_vocab_size = len(vocab)
+    output_vocab_size = len(vocab)
+
+    train_loader = NumpyDataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers,
+                               generator=torch.Generator().manual_seed(seed))
+    val_loader = NumpyDataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=num_workers,
+                             generator=torch.Generator().manual_seed(seed))
+    test_loader = NumpyDataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=num_workers,
+                              generator=torch.Generator().manual_seed(seed))
+
+    num_epochs = 200
+
+    model_trainer_hparams = dict(
+        exmp_input=next(iter(test_loader))[1:],
+        val_every_n_steps=50,
+        log_every_n_steps=50,
+        num_epochs=num_epochs,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        test_loader=test_loader,
+        batch_size=batch_size,
+        seed=seed,
+        debug=False,
+    )
+
+    general_model_hparams = dict(
+        n_layer=2,
+        d_model=128,
+        d_channel_mixing=128 * 2,
+        eps=1e-5,
+        channel_mixing_dropout=0.,
+        time_mixing_dropout=0.,
+        input_vocab_size=input_vocab_size,
+        output_vocab_size=output_vocab_size,
+        max_seq_length=max_seq_length,
+        embedding_dropout=0.,
+        use_word_embedding=True,
+        head_mode="all",
+    )
+
+    optimizer_hparams = dict(
+        lr=0.001,
+        warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
+        weight_decay=0.05,
+        b1=0.9,
+        b2=0.98,
+    )
+
+    module_name = f"setups.AssociativeRecallDataset.{model_class_name}"
+    module = importlib.import_module(module_name)
+    get_model_hparams = getattr(module, "get_model_hparams")
+
+    specific_model_hparams = get_model_hparams(model_variation_name)
+
+    model_hparams = dict(
+        **general_model_hparams,
+        **specific_model_hparams
+    )
+
+    return dict(
+        model_trainer_class=LanguageModelTrainer,
+        model_hparams=model_hparams,
+        optimizer_hparams=optimizer_hparams,
+        model_trainer_hparams=model_trainer_hparams,
+    )
+

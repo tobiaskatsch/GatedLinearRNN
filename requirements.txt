@@ -1,0 +1,10 @@
+tensorflow
+scikit-learn
+tqdm
+jax
+pytorch-lightning
+optax
+numpy
+einops
+orbax-checkpoint
+wandb
