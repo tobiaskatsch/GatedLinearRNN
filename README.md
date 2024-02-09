@@ -1,6 +1,6 @@
 # GateLoop
 
-<img src="assets/gate_loop.png" alt="GateLoop" width="500px"/>
+<img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
 
 > **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
 > Tobias Katsch*\
