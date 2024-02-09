@@ -56,7 +56,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         max_seq_length=max_seq_length,
         embedding_dropout=0.,
         use_word_embedding=True,
-        head_mode="all",
     )
 
     optimizer_hparams = dict(
