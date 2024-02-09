@@ -40,19 +40,19 @@ class GateLoop(nn.Module):
         self.model = model_class(**args)
 
 
-    def __call__(self, x, *args, **kwargs):
+    def __call__(self, x, carry=None):
         """
-        :param      x: float (batch_size, seq_len, d_model) required
-        :return:    y: float (batch_size, seq_len, d_h)
+        :param      x:      float   (batch_size, seq_len, d_model) required
+                    carry:  float   (batch_size, d_h) (optional)
+        :return:    h:      float   (batch_size, d_h)
+                    y:      float   (batch_size, seq_len, d_h)
         """
         b, _, _ = x.shape
         x = self.proj(x)
-        if self.use_true_recurrence:
-            h_0 = jnp.zeros((b, self.d_h))
-            _, y = self.model(h_0, x)
-        else:
-            y = self.model(x)
-        return y
+        if carry is None:
+            carry = jnp.zeros((b, self.d_h))
+        h, y = self.model(carry, x)
+        return h, y
 
 def binary_operator(e_i, e_j):
     a_i, kv_i = e_i
@@ -66,9 +66,10 @@ class AssociativeScanGateLoop(nn.Module):
     gate_activation: Optional[Callable] = nn.sigmoid
     use_tied_gates: Optional[bool] = True
 
-    def __call__(self, x):
+    def __call__(self, h, x):
         """
-        :param      x: float (batch_size, seq_len, d_h*4) required
+        :param      h: float (batch_size, d_h)
+                    x: float (batch_size, seq_len, d_h * (3 if self.use_tied_gates is True else 4)
         :return:    y: float (batch_size, seq_len, d_h)
         """
         input = self.input_activation(x[:, :, :self.d_h])
@@ -78,9 +79,11 @@ class AssociativeScanGateLoop(nn.Module):
             forget_gate = 1 - input_gate
         else:
             input_gate, forget_gate, output_gate = jnp.split(gates, 3, axis=-1)
-        _, hidden_state = associative_scan(binary_operator, (forget_gate, input * input_gate), axis=1)
-        output = self.hidden_activation(hidden_state) * output_gate
-        return output
+        _, h_next = associative_scan(binary_operator, (forget_gate, input * input_gate), axis=1)
+        h_next = h + h_next
+        y = self.hidden_activation(h_next) * output_gate
+        h = h_next[:, -1]
+        return h, y
 
 
 class RecurrentScanGateLoop(nn.Module):
@@ -113,6 +116,8 @@ class RecurrentScanGateLoop(nn.Module):
         h = input_t * input_gate_t + h * forget_gate_t
         y = self.hidden_activation(h) * output_gate_t
         return h, y
+
+
 
 
 

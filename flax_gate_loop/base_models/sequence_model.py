@@ -1,4 +1,5 @@
 from flax import linen as nn
+import jax.numpy as jnp
 from flax_gate_loop.base_models.channel_mixing import ChannelMixing
 
 class SequenceModel(nn.Module):
@@ -16,15 +17,16 @@ class SequenceModel(nn.Module):
             eps=self.eps
         ) for _ in range(self.n_layer)]
 
-    def __call__(self, x, training: bool):
+    def __call__(self, x, training: bool, carry=None):
         """
         :param      x           float     (batch_size, seq_len, d_model)         required
         :param      training    bool                                            optional
         :return:    y           float     (batch_size, seq_len, d_model)
         """
-        for time_mixing, channel_mixing in zip(self.time_mixing_layers, self.channel_mixing_layers):
-            x = time_mixing(x, training)
+        h = []
+        for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
+            h_l, x = time_mixing(x, training, (carry[l] if carry else None))
             x = channel_mixing(x, training)
-        return x
-
-
+            h.append(h_l)
+        h = jnp.stack(h, axis=1)
+        return h, x

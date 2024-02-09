@@ -36,7 +36,7 @@ class LanguageModel(SequenceModel):
             self.input_function = nn.Dense(self.d_model)
 
 
-    def __call__(self, x, training: bool):
+    def __call__(self, x, training: bool, carry=None):
         """
         :param      x           int       (batch_size, seq_len) or (batch_size, seq_len, input_dim)     required
         :param      training    bool                                                                    optional
@@ -50,9 +50,9 @@ class LanguageModel(SequenceModel):
             x = x + self.wpe(seq_length)
 
         x = self.embedding_dropout_function(x, deterministic=not training)
-        x = super().__call__(x, training)
+        h, x = super().__call__(x, training, carry)
         x = self.head(x)
-        return x
+        return h, x
 
 class SinusoidalPositionalEncoding(nn.Module):
     max_seq_length: int

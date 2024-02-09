@@ -40,5 +40,5 @@ class MultiHeadAttention(nn.Module):
         output = scaled_dot_product(q, k, v, mask=mask)
         output = output.transpose(0, 2, 1, 3) # [Batch, SeqLen, Head, Dims]
         output = output.reshape(batch_size, seq_len, self.d_h)
-        return output
+        return _, output
 
