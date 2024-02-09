@@ -1,6 +1,9 @@
 # GateLoop
 
-<img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
+<div style="display: flex; justify-content: space-around; align-items: center;">
+    <img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
+    <img src="assets/eq.png" alt="Equation" width="300px"/>
+</div>
 
 > **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
 > Tobias Katsch*\
@@ -8,10 +11,10 @@
 
 ## About
 
+
 GateLoop is a novel sequence model which generalizes linear recurrent models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions.
 While having a low cost linear complexity inference mode, GateLoop can be trained extremely efficient in parallel with logarithmic complexity making use of the highly optimized JAX associative scan implementation.
 This repository implements a practical (real valued) GateLoop model with proper default choices for input-, hidden- and gate activations and provides a drop-in replacement for causal multi-head-attention and a GateLoop-based language model architecture. 
-
 
 ## Installation
 
@@ -50,7 +53,7 @@ We provide 2 main modules:
   assert y.shape == (batch_size, sequence_length, d_h)
   ```
   #### Two Stage Training
-  - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through parallel scan.
+  - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through parallel scan. This disables the recurrent weights, allowing for much fast training compared to Transformer, GRU & LSTM.
   - **True Recurrent Mode:** (`use_true_recurrence=True`) Can be used to train a more expressive model from a Linear Recurrent Model checkpoint. This variant introduces additional parameters such that gates also depend on previous hidden states similar to GRU & LSTM. Due to the true recurrent nature, this mode cannot be parallelized and thus is less efficient. We recommend this for finetuning from an linear recurrent checkpoint.
 
   #### Gate Tying
