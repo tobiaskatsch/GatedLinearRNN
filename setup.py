@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='flax-gate-loop',
-    version='1.0.1',
+    version='1.0.2',
     author='Tobias Katsch',
     author_email='tobias.katsch42@gmail.com',
     packages=find_packages(),
