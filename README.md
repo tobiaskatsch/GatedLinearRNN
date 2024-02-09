@@ -59,8 +59,7 @@ We provide 2 main modules:
 
 
 - ## [gate_loop_lm.py](flax_gate_loop/language_models/gate_loop_lm.py)
-  A causal time mixing sequence model which can be used as a drop-in replacement for causal multi-head-attention.
-  Usage:
+  A GateLoop-based language model.
   ```
   import jax
   import jax.numpy as jnp
