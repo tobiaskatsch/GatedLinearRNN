@@ -15,7 +15,7 @@ This repository implements a practical (real valued) GateLoop model proper defau
 
 ## Installation
 
-- `pip install gate-loop`: The core GateLoop package.
+- `pip install flax-gate-loop`: The core GateLoop package.
 
 Other requirements:
 - JAX 0.4.20+
