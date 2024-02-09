@@ -1,2 +1,2 @@
 from .gate_loop import GateLoop
-from .language_models.gate_loop_lm import GateLoopLM
+from flax_gate_loop.language_models import GateLoopLM
