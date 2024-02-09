@@ -47,7 +47,7 @@ We provide 2 main modules:
   
   params = model.init(jax.random.PRNGKey(1), x)
   y = model.apply(params, x)
-  assert y.shape == (batch_size, sequence_length, feature_dim)
+  assert y.shape == (batch_size, sequence_length, d_h)
   ```
   #### Two Stage Training
   - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through parallel scan.
@@ -104,14 +104,14 @@ We provide 2 main modules:
   )
   
   # Sample input
-  x = jax.random.randint(jax.random.PRNGKey(0), (32, 128), 0, input_vocab_size)
+  batch_size = 32
+  x = jax.random.randint(jax.random.PRNGKey(0), (batch_size, max_seq_length), 0, input_vocab_size)
   
   # Initialize and apply model
-  y = model.apply(model.init(jax.random.PRNGKey(2), x, training=True), x, training=True)
-  
-  assert y.shape == (32, 128, d_model)
+  params = model.init(jax.random.PRNGKey(2), x, training=False)
+  y = model.apply(params, x, training=True, rngs={'dropout': jax.random.PRNGKey(0)})
+  assert y.shape == (batch_size, max_seq_length, output_vocab_size)
   ```
-
 
 ## Citation
 
