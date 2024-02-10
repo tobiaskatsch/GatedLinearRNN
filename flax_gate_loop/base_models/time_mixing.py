@@ -18,7 +18,7 @@ class CausalTimeMixing(nn.Module):
         """
         residual = x
         x = self.layer_norm_function(x)
-        h, x = self.model(x, carry)
+        h, x = self.model(x, carry=carry)
         x = x + residual
         x = self.dropout_function(x, deterministic=not training)
         return h, x

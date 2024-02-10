@@ -50,9 +50,11 @@ We provide 2 main modules:
   )
   
   params = model.init(jax.random.PRNGKey(1), x)
-  y = model.apply(params, x)
+  carry, y = model.apply(params, x, carry=None)
   assert y.shape == (batch_size, sequence_length, d_h)
+  assert carry.shape == (batch_size, d_h)
   ```
+  `carry` holds the hidden model state, which can be used for fast linear complexity autoregressive inference.
   #### Two Stage Training
   - **Associative Recurrent Mode:** (`use_true_recurrence=False`) Extremely efficient training through associative scan. This disables the recurrent weights, allowing for much faster training compared to Transformer, GRU & LSTM.
   - **True Recurrent Mode:** (`use_true_recurrence=True`) Can be used to train a more expressive model from a Linear Recurrent Model checkpoint. This variant introduces additional parameters such that the inputs and gates also depend on previous hidden states similar to GRU & LSTM. Due to the true recurrent nature, this mode cannot be parallelized and thus is less efficient. We recommend this for finetuning from an linear recurrent checkpoint.
@@ -112,9 +114,11 @@ We provide 2 main modules:
   
   # Initialize and apply model
   params = model.init(jax.random.PRNGKey(2), x, training=False)
-  y = model.apply(params, x, training=True, rngs={'dropout': jax.random.PRNGKey(0)})
+  carry, y = model.apply(params, x, training=True, carry=None, rngs={'dropout': jax.random.PRNGKey(0)})
   assert y.shape == (batch_size, max_seq_length, output_vocab_size)
+  assert carry.shape == (batch_size, n_layers, d_h)
   ```
+  `carry` holds the hidden GateLoop model states for all layers which can be used for fast linear complexity autoregressive inference.
 
 ## Citation
 

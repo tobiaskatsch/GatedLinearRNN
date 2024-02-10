@@ -50,7 +50,7 @@ class LanguageModel(SequenceModel):
             x = x + self.wpe(seq_length)
 
         x = self.embedding_dropout_function(x, deterministic=not training)
-        h, x = super().__call__(x, training, carry)
+        h, x = super().__call__(x, training, carry=carry)
         x = self.head(x)
         return h, x
 
