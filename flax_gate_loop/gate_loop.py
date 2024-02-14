@@ -79,9 +79,9 @@ class AssociativeScanGateLoop(nn.Module):
             forget_gate = 1 - input_gate
         else:
             input_gate, forget_gate, output_gate = jnp.split(gates, 3, axis=-1)
-        _, h = associative_scan(binary_operator, (forget_gate, jnp.expand_dims(h, axis=1) + input * input_gate), axis=1)
-        y = self.hidden_activation(h) * output_gate
-        h = h[:, -1, :]
+        _, h_new = associative_scan(binary_operator, (forget_gate, jnp.expand_dims(h, axis=1) + input * input_gate), axis=1)
+        y = self.hidden_activation(h_new) * output_gate
+        h = h_new[:, -1, :] * forget_gate[:, -1, :]
         return h, y
 
 
