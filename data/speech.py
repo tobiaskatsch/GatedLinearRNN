@@ -193,29 +193,32 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             end_seconds = start_seconds + snippet_length
 
             snippet_path = os.path.join(snippets_dir, f'{segment_name}_snippet_{start_seconds}_{end_seconds}')
+
             if not os.path.exists(snippet_path):
                 os.makedirs(snippet_path)
 
-            snippet_array = segment_array[start_seconds * sr:end_seconds * sr]
-            snippet_transcript = get_within(segment_transcript, start_seconds, end_seconds)
-            try:
-                snippet_array, min_idx, max_idx = process_speech_array(snippet_array)
-            except ValueError:
-                shutil.rmtree(snippet_path)
-                continue
-            min_seconds, max_seconds = min_idx/sr, max_idx/sr
-            # substract avg_word_length_seconds because "start" counts from the full detection and not from the start of speech
-            snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds - avg_word_length_seconds,
-                                            max_seconds + start_seconds)
-            snippet_transcript = transcript_to_txt(snippet_transcript)
-
             snippet_audio_path = os.path.join(snippet_path, "audio.wav")
-            clip_array_int16 = np.int16(snippet_array * 32767)
-            wavfile.write(snippet_audio_path, 44100, clip_array_int16)
-
             snippet_transcript_path = os.path.join(snippet_path, "transcript.txt")
-            with open(snippet_transcript_path, 'w') as file:
-                file.write(snippet_transcript)
+
+            if not os.path.exists(snippet_audio_path) or not os.path.exists(snippet_transcript_path):
+                snippet_array = segment_array[start_seconds * sr:end_seconds * sr]
+                snippet_transcript = get_within(segment_transcript, start_seconds, end_seconds)
+                try:
+                    snippet_array, min_idx, max_idx = process_speech_array(snippet_array)
+                except ValueError:
+                    shutil.rmtree(snippet_path)
+                    continue
+                min_seconds, max_seconds = min_idx/sr, max_idx/sr
+                # substract avg_word_length_seconds because "start" counts from the full detection and not from the start of speech
+                snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds - avg_word_length_seconds,
+                                                max_seconds + start_seconds)
+                snippet_transcript = transcript_to_txt(snippet_transcript)
+
+                clip_array_int16 = np.int16(snippet_array * 32767)
+                wavfile.write(snippet_audio_path, 44100, clip_array_int16)
+
+                with open(snippet_transcript_path, 'w') as file:
+                    file.write(snippet_transcript)
 
     def flatten_waveform_tokens(tokens, num_quantizers):
         n_q, B, T = tokens.shape
