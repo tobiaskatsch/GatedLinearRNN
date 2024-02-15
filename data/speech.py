@@ -105,8 +105,8 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         changes = np.diff(detected_binary)
         rising_edges = np.where(changes == 1)[0]
         if len(rising_edges) == 0:
-            print("No positive detection within the threshold.")
-            return np.zeros_like(x)
+            print("Anomaly detected in 'process_speech_array'")
+            raise ValueError
         min_idx = rising_edges[0]
 
         # Find the last index where detected_binary jumps from 1 to 0
@@ -124,10 +124,9 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         try:
             y[start_offset_idx:end_idx] = x[min_idx:max_idx]
         except ValueError:
-            print("Shape anomaly detected in 'process_speech_array'")
-            return np.zeros_like(x)
-
-        return y
+            print("Anomaly detected in 'process_speech_array'")
+            raise ValueError
+        return y, min_idx, max_idx
 
 
     def process_segments(mp4_file, output_path, segment_length, client=None):
@@ -150,7 +149,10 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                 clip = audio.subclip(start, end)
                 clip_array = clip.to_soundarray()  # (44100 * segment_legnth, 2)
                 clip_array = np.mean(clip_array, axis=1)  # to mono
-                clip_array = process_speech_array(clip_array)  # remove mid-sentence breaks
+                try:
+                    clip_array, _, _ = process_speech_array(clip_array)  # remove mid-sentence breaks
+                except ValueError:
+                    continue
                 clip_array_int16 = np.int16(clip_array * 32767)
                 wavfile.write(audio_path, 44100, clip_array_int16)
 
@@ -162,38 +164,60 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                     with open(transcript_path, 'w') as json_file:
                         json.dump(words, json_file)
 
+    def get_within(this_segment_transcript, min, max):
+        # return transcript dict containing all words starting within range [min, max]
+        return_list = []
+        for word in this_segment_transcript:
+            if min <= word["start"] and word["start"] <= max:
+                return_list.append(word)
+        return return_list
+
+    def transcript_to_txt(this_transcript):
+        return ' '.join([element["word"] for element in this_transcript])
+
     def process_snippets(segment_dir, snippets_dir, snippet_length):
         segment_name = os.path.basename(segment_dir)
         segment_audio_path = os.path.join(segment_dir, "audio.wav")
-        segment_audio = AudioSegment.from_wav(segment_audio_path)
-        segment_length_ms = len(segment_audio)
-        segment_length = int(segment_length_ms/1000)
-        snippet_length_ms = snippet_length * 1000
+
+        sr, segment_array = wavfile.read(segment_audio_path)
+        segment_array = segment_array / 32768.0
+        segment_length = int(len(segment_array) / sample_rate)
+        n = segment_length // snippet_length
 
         segment_transcript_path = os.path.join(segment_dir, "transcript.json")
         if os.path.exists(segment_transcript_path):
             with open(segment_transcript_path, 'r') as json_file:
                 segment_transcript = json.load(json_file)
-            transcript_snippets = snippify_transcript(segment_transcript, segment_length, snippet_length)
-        else:
-            transcript_snippets = None
 
-        for snippet_id, start_ms in enumerate(range(0, segment_length_ms, snippet_length_ms)):
-            end_ms = start_ms + snippet_length_ms
-            snippet_path = os.path.join(snippets_dir, f'{segment_name}_snippet_{start_ms}_{end_ms}')
+        for snippet_id in range(n):
+
+            start_seconds = snippet_id * snippet_length
+            end_seconds = start_seconds + snippet_length
+
+            snippet_path = os.path.join(snippets_dir, f'{segment_name}_snippet_{start_seconds}_{end_seconds}')
             if not os.path.exists(snippet_path):
                 os.makedirs(snippet_path)
 
-            snippet_audio = segment_audio[start_ms:end_ms]
+            snippet_array = segment_array[start_seconds * sample_rate:end_seconds * sample_rate]
+            snippet_transcript = get_within(segment_transcript, start_seconds, end_seconds)
+            try:
+                snippet_array, min_idx, max_idx = process_speech_array(snippet_array)
+            except ValueError:
+                continue
+            min_seconds, max_seconds = min_idx / sample_rate, max_idx / sample_rate
+            snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds,
+                                            max_seconds + start_seconds)
+            snippet_transcript = transcript_to_txt(snippet_transcript)
+
             snippet_audio_path = os.path.join(snippet_path, "audio.wav")
-            if not os.path.exists(snippet_audio_path):
-                snippet_audio.export(snippet_audio_path, format="wav")
+            clip_array_int16 = np.int16(snippet_array * 32767)
+            wavfile.write(snippet_audio_path, 44100, clip_array_int16)
 
             snippet_transcript_path = os.path.join(snippet_path, "transcript.txt")
-            if transcript_snippets is not None and not os.path.exists(snippet_transcript_path):
-                transcript_snippet = transcript_snippets[snippet_id]
-                with open(snippet_transcript_path, 'w') as file:
-                    file.write(transcript_snippet)
+            with open(snippet_transcript_path, 'w') as file:
+                file.write(snippet_transcript)
+
+
 
     def flatten_waveform_tokens(tokens, num_quantizers):
         n_q, B, T = tokens.shape
