@@ -5,9 +5,9 @@ import numpy as np
 from tqdm import tqdm
 from utils.speech_util import tokenize_transcript
 
-class UnconditionalSpeechDataset(Dataset):
+class UnconditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
-        file_path = os.path.join(data_folder_path, 'data.npy')
+        file_path = os.path.join(data_folder_path, 'audio_tokens.npy')
         self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
     def __len__(self):
         return len(self.sequences)
@@ -18,7 +18,7 @@ class UnconditionalSpeechDataset(Dataset):
 
 class ConditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
-        file_path = os.path.join(data_folder_path, 'data.npy')
+        file_path = os.path.join(data_folder_path, 'audio_tokens.npy')
         self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
     def __len__(self):
         return len(self.sequences)
