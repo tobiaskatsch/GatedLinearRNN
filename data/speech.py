@@ -69,19 +69,22 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         )
         return transcript.words
 
-    def snippify_transcript(transcript, snippet_length):
-        snippets = []
-        current_snippet_words = []
-        snippet_start_time = transcript[0]['start']/10
-        for word in transcript:
-            if (word['start']/10) - snippet_start_time <= snippet_length:
-                current_snippet_words.append(word['word']/10)
-            else:
-                snippets.append(' '.join(current_snippet_words))
-                current_snippet_words = [word['word']/10]
-                snippet_start_time = word['start']/10
-        if current_snippet_words:
-            snippets.append(' '.join(current_snippet_words))
+    def snippify_transcript(words, segment_length, snippet_length):
+        # Calculate the number of fixed-size snippets within the entire segment
+        n = int(segment_length / snippet_length)
+        # Initialize the snippets list with empty strings
+        snippets = [''] * n
+
+        for word in words:
+            # Calculate the index of the snippet where the current word belongs
+            snippet_index = int(word['start'] / snippet_length)
+            # Ensure the word falls within the range of our predefined snippets
+            if 0 <= snippet_index < n:
+                if snippets[snippet_index]:
+                    snippets[snippet_index] += ' ' + word['word']
+                else:
+                    snippets[snippet_index] = word['word']
+
         return snippets
 
     def process_segments(mp4_file, output_path, segment_length, client=None):
@@ -122,7 +125,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         if os.path.exists(segment_transcript_path):
             with open(segment_transcript_path, 'r') as json_file:
                 segment_transcript = json.load(json_file)
-            transcript_snippets = snippify_transcript(segment_transcript, snippet_length)
+            transcript_snippets = snippify_transcript(segment_transcript, segment_length, snippet_length)
         else:
             transcript_snippets = None
 
@@ -218,16 +221,16 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             audio_tokens.append(x)
         np.save(audio_tokens_path, audio_tokens)
 
-   """ transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
+    transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
     if not os.path.exists(transcript_tokens_path) and conditional is True:
         print(f"Tokenize transcript (40 tokens)")
         transcript_tokens = []
         for dir in tqdm(get_subdirs(snippets_path)):
             with open(os.path.join(dir, "transcript.txt"), 'r') as file:
-                text = file.read()
-            tokens = tokenize_transcript(text)
+            text = file.read()
+         tokens = tokenize_transcript(text)
 
-        np.save(audio_tokens_path, audio_tokens)"""
+        np.save(audio_tokens_path, audio_tokens)
 
 
 
