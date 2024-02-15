@@ -106,7 +106,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         changes = np.diff(detected_binary)
         rising_edges = np.where(changes == 1)[0]
         if len(rising_edges) == 0:
-            print("Anomaly detected in 'process_speech_array'")
             raise ValueError
         min_idx = rising_edges[0]
 
@@ -122,11 +121,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         start_offset_idx = int(start_offset_seconds * fps)
         end_idx = start_offset_idx + (max_idx - min_idx)
 
-        try:
-            y[start_offset_idx:end_idx] = x[min_idx:max_idx]
-        except ValueError:
-            print("Anomaly detected in 'process_speech_array'")
-            raise ValueError
+        y[start_offset_idx:end_idx] = x[min_idx:max_idx]
         return y, min_idx, max_idx
 
 
@@ -177,7 +172,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     def transcript_to_txt(this_transcript):
         return ' '.join([element["word"] for element in this_transcript])
 
-    def process_snippets(segment_dir, snippets_dir, snippet_length, avg_word_length_seconds=0.3):
+    def process_snippets(segment_dir, snippets_dir, snippet_length, avg_word_length_seconds=0.5):
         segment_name = os.path.basename(segment_dir)
         segment_audio_path = os.path.join(segment_dir, "audio.wav")
 
@@ -228,7 +223,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
 
     def normalize_waveform(waveform, sr, speech_tokenizer):
         waveform = waveform.float()
-        waveform = torch.mean(waveform, dim=1, keepdim=True)
         waveform = waveform.reshape(1, -1)
         waveform = torchaudio.functional.resample(waveform, sr, speech_tokenizer.sample_rate)
         return waveform
@@ -289,6 +283,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             x = normalize_waveform(x, sample_rate, speech_tokenizer)
             # Only take snippets of full length
             if x.shape[1] != speech_tokenizer.sample_rate * snippet_length:
+                print("Issue here")
                 continue
             x = tokenize_waveform(x, speech_tokenizer, num_quantizers, device)
             x = x.cpu().numpy()
