@@ -1,7 +1,5 @@
 
-
-
-def text_to_phonetic_tokens(cmu_dict, text):
+def tokenize_transcript(cmu_dict, text):
     words = text.split()
     phonetic_tokens = []
     for word in words:

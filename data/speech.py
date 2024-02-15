@@ -43,6 +43,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     import json
     from pydub import AudioSegment
     import nltk
+    from scipy.io import wavfile
     from nltk.corpus import cmudict
     nltk.download('cmudict')
     cmu_dict = cmudict.dict()
@@ -71,14 +72,14 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     def snippify_transcript(transcript, snippet_length):
         snippets = []
         current_snippet_words = []
-        snippet_start_time = transcript[0]['start']
+        snippet_start_time = transcript[0]['start']/10
         for word in transcript:
-            if word['start'] - snippet_start_time <= snippet_length:
-                current_snippet_words.append(word['word'])
+            if (word['start']/10) - snippet_start_time <= snippet_length:
+                current_snippet_words.append(word['word']/10)
             else:
                 snippets.append(' '.join(current_snippet_words))
-                current_snippet_words = [word['word']]
-                snippet_start_time = word['start']
+                current_snippet_words = [word['word']/10]
+                snippet_start_time = word['start']/10
         if current_snippet_words:
             snippets.append(' '.join(current_snippet_words))
         return snippets
@@ -199,26 +200,38 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     for dir in tqdm(get_subdirs(segments_path)):
         process_snippets(dir, snippets_path, snippet_length)
 
+    audio_tokens_path = os.path.join(data_folder_path, "audio_tokens.npy")
+    if not os.path.exists(audio_tokens_path):
+        print(f"Tokenize audio (1024 tokens)")
+        audio_tokens = []
+        for dir in tqdm(get_subdirs(snippets_path)):
+            sample_rate, x = wavfile.read(os.path.join(dir, "audio.wav"))
+            x = torch.from_numpy(x)
+            x = x / 32768.0
+            x = normalize_waveform(x, sample_rate, speech_tokenizer)
+            # Only take snippets of full length
+            if x.shape[1] != speech_tokenizer.sample_rate * snippet_length:
+                continue
+            x = tokenize_waveform(x, speech_tokenizer, num_quantizers, device)
+            x = x.cpu().numpy()
+            x = x.reshape(-1)
+            audio_tokens.append(x)
+        np.save(audio_tokens_path, audio_tokens)
 
-    """dataset = []
-    print("Normalize and Tokenize")
-    for file in tqdm(get_files(wav_folder)):
-        # load wav file as numpy array
-        sample_rate, x = wavfile.read(file)
-        x = torch.from_numpy(x)
-        x = x / 32768.0
-        x = normalize_waveform(x, sample_rate, speech_tokenizer)
-        # Only take snippets of full length
-        if x.shape[1] != speech_tokenizer.sample_rate * snippet_length:
-            continue
-        x = tokenize(x, speech_tokenizer, num_quantizers, device)
-        x = x.cpu().numpy()
-        x = x.reshape(-1)
-        dataset.append(x)
+    transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
+    if not os.path.exists(transcript_tokens_path) and conditional is True:
+        print(f"Tokenize transcript (40 tokens)")
+        transcript_tokens = []
+        for dir in tqdm(get_subdirs(snippets_path)):
+            with open(os.path.join(dir, "transcript.txt"), 'r') as file:
+                text = file.read()
+            tokens = tokenize_transcript(text)
 
-    dataset = np.array(dataset)
+        np.save(audio_tokens_path, audio_tokens)
 
-    np.save(os.path.join(data_folder_path, 'data.npy'), dataset)"""
+
+
+
 
 
 
