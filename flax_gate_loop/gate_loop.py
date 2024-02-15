@@ -40,7 +40,7 @@ class GateLoop(nn.Module):
         self.model = model_class(**args)
 
 
-    def __call__(self, x, carry=None):
+    def __call__(self, x, *args, carry=None, **kwargs):
         """
         :param      x:      float   (batch_size, seq_len, d_model) required
                     carry:  float   (batch_size, d_h) (optional)
@@ -69,7 +69,7 @@ class AssociativeScanGateLoop(nn.Module):
     gate_activation: Optional[Callable] = nn.sigmoid
     use_tied_gates: Optional[bool] = True
 
-    def __call__(self, x, *args, carry=None, **kwargs):
+    def __call__(self, x, carry=None):
         """
         :param      h: float (batch_size, d_h)
                     x: float (batch_size, seq_len, d_h * (3 if self.use_tied_gates is True else 4)
