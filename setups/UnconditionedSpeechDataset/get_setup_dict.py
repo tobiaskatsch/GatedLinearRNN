@@ -16,8 +16,8 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     data_folder_path = os.path.join(datasets_path, "speech")
 
     if fresh_preprocess:
-        playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5E7xfVEc4WuBJ7HlKxlKt1c&si=dXlobK2oFeQWVR0u"
-        # playlist_url = "https://youtube.com/playlist?list=PLddTAfQv0Vy17WO50eUfo3MhJLl0Be097&si=FrovvlAJYZOyegMU"
+        #playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5E7xfVEc4WuBJ7HlKxlKt1c&si=dXlobK2oFeQWVR0u"
+        playlist_url = "https://youtube.com/playlist?list=PLddTAfQv0Vy17WO50eUfo3MhJLl0Be097&si=FrovvlAJYZOyegMU"
         speech_tokenizer_path = "/content/SpeechTokenizer"
         preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional=False, snippet_length=10, num_quantizers=4)
 
