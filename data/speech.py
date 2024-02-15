@@ -39,6 +39,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     from pytube import Playlist
     import os
     import torch
+    import shutil
     from moviepy.editor import AudioFileClip
     import json
     from pydub import AudioSegment
@@ -152,6 +153,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                 try:
                     clip_array, _, _ = process_speech_array(clip_array)  # remove mid-sentence breaks
                 except ValueError:
+                    shutil.rmtree(this_output_dir)
                     continue
                 clip_array_int16 = np.int16(clip_array * 32767)
                 wavfile.write(audio_path, 44100, clip_array_int16)
@@ -175,7 +177,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     def transcript_to_txt(this_transcript):
         return ' '.join([element["word"] for element in this_transcript])
 
-    def process_snippets(segment_dir, snippets_dir, snippet_length):
+    def process_snippets(segment_dir, snippets_dir, snippet_length, avg_word_length_seconds=0.3):
         segment_name = os.path.basename(segment_dir)
         segment_audio_path = os.path.join(segment_dir, "audio.wav")
 
@@ -203,9 +205,11 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             try:
                 snippet_array, min_idx, max_idx = process_speech_array(snippet_array)
             except ValueError:
+                shutil.rmtree(snippet_path)
                 continue
-            min_seconds, max_seconds = min_idx / sr, max_idx / sr
-            snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds,
+            min_seconds, max_seconds = min_idx/sr, max_idx/sr
+            # substract avg_word_length_seconds because "start" counts from the full detection and not from the start of speech
+            snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds - avg_word_length_seconds,
                                             max_seconds + start_seconds)
             snippet_transcript = transcript_to_txt(snippet_transcript)
 
