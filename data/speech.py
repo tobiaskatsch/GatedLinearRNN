@@ -89,7 +89,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         duration = int(audio.duration)
 
         # Split the audio into 10-second clips and save
-        output_name = os.path.basename(mp4_file)
+        output_name = os.path.basename(mp4_file).split(".")[0]
         for start in tqdm(range(0, duration, segment_length)):
             this_output_dir = os.path.join(output_path, f'{output_name}_segment_{start}_{start + segment_length}')
             if not os.path.exists(this_output_dir):
