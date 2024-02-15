@@ -8,7 +8,7 @@ from utils.speech_util import tokenize_transcript
 class UnconditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
         file_path = os.path.join(data_folder_path, 'audio_tokens.npy')
-        self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
+        self.sequences = np.load(file_path, allow_pickle=True)  # (nr_sequences, seq_len)
     def __len__(self):
         return len(self.sequences)
     def __getitem__(self, index):
@@ -18,14 +18,21 @@ class UnconditionedSpeechDataset(Dataset):
 
 class ConditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
-        file_path = os.path.join(data_folder_path, 'audio_tokens.npy')
-        self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
+        audio_tokens_path = os.path.join(data_folder_path, 'audio_tokens.npy')
+        transcript_tokens_path = os.path.join(data_folder_path, 'transcript_tokens.npy')
+        transcript_masks_path = os.path.join(data_folder_path, "transcript_masks.npy")
+        self.audio_tokens_sequences = np.load(audio_tokens_path, allow_pickle=True)               # (nr_sequences, seq_len)
+        self.transcript_tokens_sequences = np.load(transcript_tokens_path, allow_pickle=True)     # (nr_sequences, max_phonetics)
+        self.transcript_masks_sequences = np.load(transcript_masks_path, allow_pickle=True)       # (nr_sequences, max_phonetics)
+
     def __len__(self):
         return len(self.sequences)
     def __getitem__(self, index):
-        inputs = self.sequences[index][:-1]
-        targets = self.sequences[index][1:]
-        return targets, inputs
+        targets = self.audio_tokens_sequences[index][1:]
+        audio_tokens = self.audio_tokens_sequences[index][:-1]
+        transcript_tokens = self.transcript_tokens_sequences[index]
+        transcript_masks = self.transcript_masks_sequences[index]
+        return targets, audio_tokens, transcript_tokens, transcript_masks
 
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]

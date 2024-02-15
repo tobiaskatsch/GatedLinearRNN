@@ -35,7 +35,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     val_loader = NumpyDataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=num_workers,
                              generator=torch.Generator().manual_seed(seed))
 
-    num_epochs = 50
+    num_epochs = 100
 
     model_trainer_hparams = dict(
         exmp_input=next(iter(train_loader))[1:],
