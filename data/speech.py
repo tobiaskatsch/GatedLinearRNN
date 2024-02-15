@@ -182,7 +182,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     number_of_channels = 2  # Number of audio channels (stereo)
     bit_depth_bytes = 2  # Bit depth in bytes (16 bits = 2 bytes)
     segment_length = file_size_bytes / (sample_rate_hz * number_of_channels * bit_depth_bytes)  # 148.6s
-    segment_length = (segment_length // 10) * 10  # Round to 140s
+    segment_length = int((segment_length // 10) * 10)  # Round to 140s
 
     print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transribe' if conditional else ''}")
     # 140s --> roughly 24MB < 25MB (upper limit of whisper)
