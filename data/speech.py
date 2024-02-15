@@ -181,7 +181,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
 
         sr, segment_array = wavfile.read(segment_audio_path)
         segment_array = segment_array / 32768.0
-        segment_length = int(len(segment_array) / sample_rate)
+        segment_length = int(len(segment_array) / sr)
         n = segment_length // snippet_length
 
         segment_transcript_path = os.path.join(segment_dir, "transcript.json")
@@ -198,13 +198,13 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             if not os.path.exists(snippet_path):
                 os.makedirs(snippet_path)
 
-            snippet_array = segment_array[start_seconds * sample_rate:end_seconds * sample_rate]
+            snippet_array = segment_array[start_seconds * sr:end_seconds * sr]
             snippet_transcript = get_within(segment_transcript, start_seconds, end_seconds)
             try:
                 snippet_array, min_idx, max_idx = process_speech_array(snippet_array)
             except ValueError:
                 continue
-            min_seconds, max_seconds = min_idx / sample_rate, max_idx / sample_rate
+            min_seconds, max_seconds = min_idx / sr, max_idx / sr
             snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds,
                                             max_seconds + start_seconds)
             snippet_transcript = transcript_to_txt(snippet_transcript)
@@ -216,8 +216,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             snippet_transcript_path = os.path.join(snippet_path, "transcript.txt")
             with open(snippet_transcript_path, 'w') as file:
                 file.write(snippet_transcript)
-
-
 
     def flatten_waveform_tokens(tokens, num_quantizers):
         n_q, B, T = tokens.shape
