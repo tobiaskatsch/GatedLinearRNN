@@ -69,23 +69,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         )
         return transcript.words
 
-    def snippify_transcript(words, segment_length, snippet_length):
-        # Calculate the number of fixed-size snippets within the entire segment
-        n = int(segment_length / snippet_length)
-        # Initialize the snippets list with empty strings
-        snippets = [''] * n
-
-        for word in words:
-            # Calculate the index of the snippet where the current word belongs
-            snippet_index = int(word['start'] / snippet_length)
-            # Ensure the word falls within the range of our predefined snippets
-            if 0 <= snippet_index < n:
-                if snippets[snippet_index]:
-                    snippets[snippet_index] += ' ' + word['word']
-                else:
-                    snippets[snippet_index] = word['word']
-
-        return snippets
 
     def process_segments(mp4_file, output_path, segment_length, client=None):
 
@@ -115,36 +98,41 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                         json.dump(words, json_file)
 
     def process_snippets(segment_dir, snippets_dir, snippet_length):
-        segment_name = os.path.basename(segment_dir)
+        # Paths to segment files
         segment_audio_path = os.path.join(segment_dir, "audio.wav")
+        segment_transcript_path = os.path.join(segment_dir, "transcript.json")
+
+        # Load the segment audio
         segment_audio = AudioSegment.from_wav(segment_audio_path)
         segment_length_ms = len(segment_audio)
         snippet_length_ms = snippet_length * 1000
 
-        segment_transcript_path = os.path.join(segment_dir, "transcript.json")
+        # Load the transcript if available
+        transcript_snippets = {}
         if os.path.exists(segment_transcript_path):
             with open(segment_transcript_path, 'r') as json_file:
                 segment_transcript = json.load(json_file)
-            transcript_snippets = snippify_transcript(segment_transcript, segment_length, snippet_length)
-        else:
-            transcript_snippets = None
+            for word in segment_transcript:
+                snippet_index = int(word['start'] * 1000 / snippet_length_ms)
+                transcript_snippets.setdefault(snippet_index, []).append(word['word'])
 
-        for snippet_id, start_ms in enumerate(range(0, segment_length_ms, snippet_length_ms)):
+        # Process each snippet
+        for start_ms in range(0, segment_length_ms, snippet_length_ms):
             end_ms = start_ms + snippet_length_ms
-            snippet_path = os.path.join(snippets_dir, f'{segment_name}_snippet_{start_ms}_{end_ms}')
-            if not os.path.exists(snippet_path):
-                os.makedirs(snippet_path)
+            snippet_dir = os.path.join(snippets_dir, f"{segment_dir}_snippet_{start_ms}_{end_ms}")
+            os.makedirs(snippet_dir, exist_ok=True)
 
+            # Export snippet audio
+            snippet_audio_path = os.path.join(snippet_dir, "audio.wav")
             snippet_audio = segment_audio[start_ms:end_ms]
-            snippet_audio_path = os.path.join(snippet_path, "audio.wav")
-            if not os.path.exists(snippet_audio_path):
-                snippet_audio.export(snippet_audio_path, format="wav")
+            snippet_audio.export(snippet_audio_path, format="wav")
 
-            snippet_transcript_path = os.path.join(snippet_path, "transcript.txt")
-            if transcript_snippets is not None and not os.path.exists(snippet_transcript_path):
-                transcript_snippet = transcript_snippets[snippet_id]
+            # Write transcript for the snippet if available
+            snippet_transcript_path = os.path.join(snippet_dir, "transcript.txt")
+            snippet_index = start_ms // snippet_length_ms
+            if snippet_index in transcript_snippets:
                 with open(snippet_transcript_path, 'w') as file:
-                    file.write(transcript_snippet)
+                    file.write(' '.join(transcript_snippets[snippet_index]))
 
     def flatten_waveform_tokens(tokens, num_quantizers):
         n_q, B, T = tokens.shape
