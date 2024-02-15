@@ -1,7 +1,7 @@
 from typing import Optional, Callable
 from flax_gate_loop.base_models.language_model import LanguageModel
 from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
-from flax_gate_loop.transformer import MultiHeadAttention
+from flax_gate_loop.attention import MultiHeadSelfAttention
 
 
 class TransformerLM(LanguageModel):
@@ -17,6 +17,7 @@ class TransformerLM(LanguageModel):
     embedding_dropout: float
     use_word_embedding: bool
     positional_encoding_mode: str
+    use_head: bool
 
     d_h: int
     n_head: int
@@ -28,7 +29,7 @@ class TransformerLM(LanguageModel):
         self.time_mixing_layers = [CausalTimeMixing(
             eps=self.eps,
             dropout=self.time_mixing_dropout,
-            model=MultiHeadAttention(
+            model=MultiHeadSelfAttention(
                 d_h=self.d_h,
                 n_head=self.n_head,
                 use_causal_mask=self.use_causal_mask,

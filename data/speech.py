@@ -29,7 +29,7 @@ class ConditionedSpeechDataset(Dataset):
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]
 
-def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional, snippet_length=10, num_quantizers=4):
+def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional, snippet_length=10, num_quantizers=4, max_phonetics=100):
 
     # Source: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
@@ -47,6 +47,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     from scipy.io import wavfile
     from nltk.corpus import cmudict
     from scipy.ndimage import maximum_filter1d
+    from ..utils.speech_util import tokenize_transcript
     nltk.download('cmudict')
     cmu_dict = cmudict.dict()
 
@@ -292,15 +293,26 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         np.save(audio_tokens_path, audio_tokens)
 
     transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
-    """if not os.path.exists(transcript_tokens_path) and conditional is True:
+    transcript_masks_path = os.path.join(data_folder_path, "transcript_masks.npy")
+    if (not os.path.exists(transcript_tokens_path) or not os.path.exists(transcript_masks_path)) and conditional is True:
         print(f"Tokenize transcript (40 tokens)")
-        transcript_tokens = []
+        transcript_tokens, transcript_masks = [], []
         for dir in tqdm(get_subdirs(snippets_path)):
             with open(os.path.join(dir, "transcript.txt"), 'r') as file:
-            text = file.read()
-         tokens = tokenize_transcript(text)
+                text = file.read()
 
-        np.save(audio_tokens_path, audio_tokens)"""
+            tokens = tokenize_transcript(cmu_dict, text)
+            tokens_padded = np.full(max_phonetics, 70, dtype=int)  # pad with 70 (UNK)
+            tokens_padded[:len(tokens)] = tokens
+            transcript_tokens.append(tokens_padded)
+
+            mask = np.zeros(max_phonetics, dtype=bool)
+            mask[:len(tokens)] = 1  # Mark original token positions with 1
+            transcript_masks.append(mask)
+
+        np.save(transcript_tokens_path, transcript_tokens)
+        np.save(transcript_masks_path, transcript_masks)
+
 
 
 

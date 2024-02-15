@@ -15,6 +15,7 @@ class LanguageModel(SequenceModel):
     embedding_dropout: float
     use_word_embedding: bool
     positional_encoding_mode: str
+    use_head: bool
 
     def setup(self):
         if self.positional_encoding_mode == 'learned':
@@ -27,7 +28,8 @@ class LanguageModel(SequenceModel):
             raise NotImplementedError
         if self.input_vocab_size is None and self.use_word_embedding:
             raise AttributeError("self.input_vocab_size is None and self.use_word_embedding")
-        self.head = nn.Dense(self.output_vocab_size)
+        if self.use_head is True:
+            self.head = nn.Dense(self.output_vocab_size)
         super().setup()
         self.embedding_dropout_function = nn.Dropout(rate=self.embedding_dropout)
         if self.use_word_embedding:
@@ -36,7 +38,7 @@ class LanguageModel(SequenceModel):
             self.input_function = nn.Dense(self.d_model)
 
 
-    def __call__(self, x, training: bool, carry=None):
+    def __call__(self, x, training: bool, carry=None, mask=None):
         """
         :param      x           int       (batch_size, seq_len) or (batch_size, seq_len, input_dim)     required
         :param      training    bool                                                                    optional
@@ -50,8 +52,9 @@ class LanguageModel(SequenceModel):
             x = x + self.wpe(seq_length)
 
         x = self.embedding_dropout_function(x, deterministic=not training)
-        h, x = super().__call__(x, training, carry=carry)
-        x = self.head(x)
+        h, x = super().__call__(x, training, carry=carry, mask=mask)
+        if self.use_head is True:
+            x = self.head(x)
         return h, x
 
 class SinusoidalPositionalEncoding(nn.Module):

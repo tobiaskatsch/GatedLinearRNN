@@ -17,6 +17,7 @@ class GateLoopLM(LanguageModel):
     embedding_dropout: float
     use_word_embedding: bool
     positional_encoding_mode: str
+    use_head: bool
 
     d_h: int
     input_activation: Optional[Callable] = nn.tanh
