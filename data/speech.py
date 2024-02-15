@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import os
 import numpy as np
 from tqdm import tqdm
+from utils.speech_util import tokenize_transcript
 
 class UnconditionalSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
@@ -47,7 +48,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     from scipy.io import wavfile
     from nltk.corpus import cmudict
     from scipy.ndimage import maximum_filter1d
-    from ..utils.speech_util import tokenize_transcript
     nltk.download('cmudict')
     cmu_dict = cmudict.dict()
 
