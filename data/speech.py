@@ -52,8 +52,12 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             os.makedirs(output_path)
         playlist = Playlist(playlist_url)
         for i, video in enumerate(playlist.videos):
+            filename = f"video_{i}.mp4"
+            full_output_path = os.path.join(output_path, filename)
+            if os.path.exists(full_output_path):
+                continue
             audio_stream = video.streams.get_audio_only()
-            audio_stream.download(output_path=output_path, filename=f"video_{i}.mp4")
+            audio_stream.download(output_path=output_path, filename=filename)
 
     def transcibe(client, audio_file, model="whisper-1"):
         transcript = client.audio.transcriptions.create(
