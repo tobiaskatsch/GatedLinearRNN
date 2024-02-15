@@ -131,7 +131,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
 
         audio = AudioFileClip(mp4_file)
         duration = audio.duration # seconds
-        duration = int((duration // 10) * 10)  # round down to 10s
+        duration = int(duration) - 1
 
         # Split the audio into 10-second clips and save
         output_name = os.path.basename(mp4_file).split(".")[0]
