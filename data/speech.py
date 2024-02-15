@@ -121,8 +121,11 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         start_offset_idx = int(start_offset_seconds * fps)
         end_idx = start_offset_idx + (max_idx - min_idx)
 
-        # Copy segment from x to y, considering start offset
-        y[start_offset_idx:end_idx] = x[min_idx:max_idx]
+        try:
+            y[start_offset_idx:end_idx] = x[min_idx:max_idx]
+        except ValueError:
+            print("Shape anomaly detected in 'process_speech_array'")
+            return np.zeros_like(x)
 
         return y
 
@@ -130,7 +133,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     def process_segments(mp4_file, output_path, segment_length, client=None):
 
         audio = AudioFileClip(mp4_file)
-        duration = audio.duration # seconds
+        duration = audio.duration  # seconds
         duration = int(duration) - 1
 
         # Split the audio into 10-second clips and save
