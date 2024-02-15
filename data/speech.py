@@ -267,7 +267,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         np.save(audio_tokens_path, audio_tokens)
 
     transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
-    if not os.path.exists(transcript_tokens_path) and conditional is True:
+    """if not os.path.exists(transcript_tokens_path) and conditional is True:
         print(f"Tokenize transcript (40 tokens)")
         transcript_tokens = []
         for dir in tqdm(get_subdirs(snippets_path)):
@@ -275,7 +275,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             text = file.read()
          tokens = tokenize_transcript(text)
 
-        np.save(audio_tokens_path, audio_tokens)
+        np.save(audio_tokens_path, audio_tokens)"""
 
 
 
