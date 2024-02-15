@@ -305,6 +305,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                 text = file.read()
 
             tokens = tokenize_transcript(cmu_dict, text)
+            tokens = np.array(tokens)[:min(len(tokens), max_phonetics)]
             tokens_padded = np.full(max_phonetics, 70, dtype=int)  # pad with 70 (UNK)
             tokens_padded[:len(tokens)] = tokens
             transcript_tokens.append(tokens_padded)
