@@ -1,4 +1,4 @@
-from data.speech import SpeechDataset, preprocess_speech
+from data.speech import UnconditionedSpeechDataset, preprocess_speech
 from data.numpy_data_loader import NumpyDataLoader
 import torch
 from torch.utils.data import random_split
@@ -17,10 +17,11 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
     if fresh_preprocess:
         playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5E7xfVEc4WuBJ7HlKxlKt1c&si=dXlobK2oFeQWVR0u"
+        # playlist_url = "https://youtube.com/playlist?list=PLddTAfQv0Vy17WO50eUfo3MhJLl0Be097&si=FrovvlAJYZOyegMU"
         speech_tokenizer_path = "/content/SpeechTokenizer"
-        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, snippet_length=10, num_quantizers=4)
+        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional=False, snippet_length=10, num_quantizers=4)
 
-    dataset = SpeechDataset(data_folder_path)
+    dataset = UnconditionedSpeechDataset(data_folder_path)
     val_size = int(len(dataset) * val_fraction)
     train_size = len(dataset) - val_size
     torch.manual_seed(seed)
@@ -70,7 +71,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         b2=0.98,
     )
 
-    module_name = f"setups.SpeechDataset.{model_class_name}"
+    module_name = f"setups.UnconditionedSpeechDataset.{model_class_name}"
     module = importlib.import_module(module_name)
     get_model_hparams = getattr(module, "get_model_hparams")
 

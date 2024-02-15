@@ -2,10 +2,9 @@ import torch
 from torch.utils.data import Dataset
 import os
 import numpy as np
-from transformers import GPT2Tokenizer
 from tqdm import tqdm
 
-class SpeechDataset(Dataset):
+class UnconditionalSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
         file_path = os.path.join(data_folder_path, 'data.npy')
         self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
@@ -16,107 +15,71 @@ class SpeechDataset(Dataset):
         targets = self.sequences[index][1:]
         return targets, inputs
 
+class ConditionedSpeechDataset(Dataset):
+    def __init__(self, data_folder_path):
+        file_path = os.path.join(data_folder_path, 'data.npy')
+        self.sequences = np.load(os.path.join(file_path), allow_pickle=True)  # (nr_sequences, seq_len)
+    def __len__(self):
+        return len(self.sequences)
+    def __getitem__(self, index):
+        inputs = self.sequences[index][:-1]
+        targets = self.sequences[index][1:]
+        return targets, inputs
 
+def get_subdirs(directory):
+    return [os.path.join(directory, name) for name in os.listdir(directory)]
 
-def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, snippet_length=10, num_quantizers=4):
+def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional, snippet_length=10, num_quantizers=4):
 
     # Source: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
 
     from speechtokenizer import SpeechTokenizer
-    import soundfile as sf
-    import torchaudio
-    from pytube import Playlist
-    from moviepy.editor import AudioFileClip
-    from datasets import load_dataset
-    from scipy.io import wavfile
+    from utils.speech_util import *
+    import nltk
+    from nltk.corpus import cmudict
+    nltk.download('cmudict')
+    cmu_dict = cmudict.dict()
 
-    def download_audio_from_playlist(playlist_url, output_path):
-        playlist = Playlist(playlist_url)
-        for video in playlist.videos:
-            audio_stream = video.streams.get_audio_only()
-            audio_stream.download(output_path=output_path, filename=video.title + ".mp4")
-
-    def convert_mp4_to_wav_clips(mp4_file, output_dir, snippet_length):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
-        # Convert mp4 to wav and split into 10-second clips
-        # Load the audio from the video file
-        audio = AudioFileClip(mp4_file)
-
-        # Duration of the audio in seconds
-        duration = int(audio.duration)
-
-        # Split the audio into 10-second clips and save
-        mp4_output_name = os.path.basename(mp4_file).split('.')[0].replace(' ', '_').replace("#", "num")
-        print(mp4_output_name)
-        for start in range(0, duration, snippet_length):
-            outputpath = os.path.join(output_dir, f'{mp4_output_name}_clip_{start}_{start + snippet_length}.wav')
-            if os.path.exists(outputpath):
-                continue
-            end = min(start + snippet_length, duration)
-            clip = audio.subclip(start, end)
-            clip.write_audiofile(outputpath, verbose=False, logger=None)
-
-    def get_files(directory):
-        return [os.path.join(directory, file) for file in os.listdir(directory)]
-
-    def save_to_file(tok, filename, speech_tokenizer, device):
-        outputwav = decode_tokens(tok.detach().to(device), speech_tokenizer)
-        save_waveform(filename, outputwav)
-
-    def save_waveform(filename, waveform):
-        torchaudio.save(filename, waveform[0].detach().cpu(), 16000)
-
-    def decode_tokens(tokens, speech_tokenizer):
-        unflattened_tokens = unflatten_tokens(tokens)
-        return speech_tokenizer.decode(unflattened_tokens)
-
-    def flatten_tokens(tokens, num_quantizers):
-        n_q, B, T = tokens.shape
-        transpose_tokens = tokens.transpose(0, 2)
-        return transpose_tokens.reshape(B, T * num_quantizers)
-
-    def unflatten_tokens(tokens, num_quantizers):
-        B, L = tokens.shape
-        T = L // num_quantizers
-        return tokens.reshape(T, B, num_quantizers).transpose(0, 2)
-
-    def normalize_waveform(waveform, sr, speech_tokenizer):
-        waveform = waveform.float()
-        waveform = torch.mean(waveform, dim=1, keepdim=True)
-        waveform = waveform.reshape(1, -1)
-        waveform = torchaudio.functional.resample(waveform, sr, speech_tokenizer.sample_rate)
-        return waveform
-
-    def tokenize(waveform, speech_tokenizer, num_quantizers, device):
-        with torch.no_grad():
-            codes = speech_tokenizer.encode(waveform.unsqueeze(0).to(device))  # codes: (n_q, B, T)
-        semantic_tokens = codes[:num_quantizers, :, :].cpu()
-        semantic_tokens = flatten_tokens(semantic_tokens, num_quantizers)
-        return semantic_tokens
-
+    if conditional is True:
+        from openai import OpenAI
+        api_key = input("Please enter your OpenAI API key: ")
+        client = OpenAI(api_key=api_key)
+    else:
+        client = None
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     config_path = os.path.join(speech_tokenizer_path, "speechtokenizer_hubert_avg", "config.json")
     ckpt_path = os.path.join(speech_tokenizer_path, "speechtokenizer_hubert_avg", "SpeechTokenizer.pt")
-
     speech_tokenizer = SpeechTokenizer.load_from_checkpoint(config_path, ckpt_path).to(device)
     speech_tokenizer.eval()
 
+    mp4_path = os.path.join(data_folder_path, "mp4")
 
-    mp4_folder = os.path.join(data_folder_path, "mp4")
-    wav_folder = os.path.join(data_folder_path, "wav")
-    download_audio_from_playlist(playlist_url, mp4_folder)
+    download_audio_from_playlist(playlist_url, mp4_path)
+
+    # Assumed file formats
+    file_size_mb = 25  # Target file size in MB
+    file_size_bytes = file_size_mb * 1048576  # Convert MB to bytes
+    sample_rate_hz = 44100  # Sample rate in Hz
+    number_of_channels = 2  # Number of audio channels (stereo)
+    bit_depth_bytes = 2  # Bit depth in bytes (16 bits = 2 bytes)
+    segment_length = file_size_bytes / (sample_rate_hz * number_of_channels * bit_depth_bytes)  # 148.6s
+    segment_length = (segment_length // 10) * 10  # Round to 140s
+
+    print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transribe' if conditional else ''}")
+    # 140s --> roughly 24MB < 25MB (upper limit of whisper)
+    segments_path = os.path.join(data_folder_path, "segments")
+    for file in tqdm(get_subdirs(mp4_path)):
+        process_segments(file, segments_path, segment_length, client=client)
+
+    print(f"Convert wav segments to snippets")
+    snippets_path = os.path.join(data_folder_path, "snippets")
+    for dir in tqdm(get_subdirs(segments_path)):
+        process_snippets(dir, snippets_path, snippet_length)
 
 
-    print("Convert mp4 to wav")
-    for file in tqdm(get_files(mp4_folder)):
-        convert_mp4_to_wav_clips(file, wav_folder, snippet_length)
-
-
-    dataset = []
+    """dataset = []
     print("Normalize and Tokenize")
     for file in tqdm(get_files(wav_folder)):
         # load wav file as numpy array
@@ -134,7 +97,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, sni
 
     dataset = np.array(dataset)
 
-    np.save(os.path.join(data_folder_path, 'data.npy'), dataset)
+    np.save(os.path.join(data_folder_path, 'data.npy'), dataset)"""
 
 
 
