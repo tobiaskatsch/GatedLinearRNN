@@ -5,7 +5,7 @@ import orbax
 
 def load_model(dataset_class_name, model_class_name, model_variation_name, exmp_input_args, checkpoint_path, exmp_input_kwargs={}):
     model_hparams = get_model_setup_dict(dataset_class_name, model_class_name, model_variation_name)
-    model_class = get_class_from_name(model_class_name),
+    model_class = get_class_from_name(model_class_name)
     model = model_class(**model_hparams)
     init_rng = random.PRNGKey(0)
     _ = model.init(init_rng, *exmp_input_args, training=False, **exmp_input_kwargs)
