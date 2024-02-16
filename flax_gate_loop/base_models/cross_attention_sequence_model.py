@@ -43,7 +43,7 @@ class CrossAttentionSequenceModel(SequenceModel):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None), mask=mask)
             residual = x
             x = self.layer_norm(x)
-            x = self.cross_attention(x, encoding)
+            x = cross_attention(x, encoding)
             x = x + residual
             x = self.dropout_function(x, deterministic=not training)
             x = channel_mixing(x, training)
