@@ -25,9 +25,6 @@ def is_unpackable(var):
 def get_class_from_name(class_name):
     return globals()[class_name]
 
-def run_model_init(model, init_rng, exmp_input):
-    if is_unpackable(exmp_input):
-        return model.init(init_rng, *exmp_input, training=False)
-    else:
-        return model.init(init_rng, exmp_input, training=False)
+def run_model_init(model, init_rng, exmp_input_args, exmp_input_kwargs):
+    return model.init(init_rng, *exmp_input_args, training=False, **exmp_input_kwargs)
 

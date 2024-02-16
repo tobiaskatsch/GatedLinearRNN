@@ -28,7 +28,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     num_epochs = 200
 
     model_trainer_hparams = dict(
-        exmp_input=next(iter(test_loader))[1:],
+        exmp_input_args=(next(iter(test_loader))[1:],),
         val_every_n_steps=50,
         log_every_n_steps=50,
         num_epochs=num_epochs,

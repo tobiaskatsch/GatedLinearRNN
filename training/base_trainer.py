@@ -23,7 +23,7 @@ class BaseTrainer:
                  model_hparams: Dict[str, Any],
                  optimizer_hparams: Dict[str, Any],
                  logger_params: Dict[str, Any],
-                 exmp_input: Any,
+                 exmp_input_args: Any,
                  val_every_n_steps: int,
                  log_every_n_steps: int,
                  num_epochs,
@@ -41,13 +41,15 @@ class BaseTrainer:
                  debug: bool = False,
                  save_path=None,
                  start_from_checkpoint_path=None,
-            ):
+                 exmp_input_kwargs={},
+                 ):
         super().__init__()
         self.model_class = model_class
         self.model_hparams = model_hparams
         self.optimizer_hparams = optimizer_hparams
         self.logger_params = logger_params
-        self.exmp_input = exmp_input
+        self.exmp_input_args = exmp_input_args
+        self.exmp_input_kwargs = exmp_input_kwargs
         self.val_every_n_steps = val_every_n_steps
         self.log_every_n_steps = log_every_n_steps
         self.num_epochs = num_epochs
@@ -100,7 +102,7 @@ class BaseTrainer:
         model_rng = random.PRNGKey(self.seed)
         model_rng, init_rng = random.split(model_rng)
         # Run model initialization
-        params = run_model_init(self.model, init_rng, self.exmp_input)['params']
+        params = run_model_init(self.model, init_rng, self.exmp_input_args, self.exmp_input_kwargs)['params']
         # Create default state. Optimizer is initialized later
 
         hparams = copy(self.optimizer_hparams)
@@ -131,11 +133,7 @@ class BaseTrainer:
         )
 
     def print_tabulate(self):
-        if is_unpackable(self.exmp_input):
-            print(self.model.tabulate(random.PRNGKey(0), *self.exmp_input, training=False))
-        else:
-            print(self.model.tabulate(random.PRNGKey(0), self.exmp_input, training=False))
-
+        print(self.model.tabulate(random.PRNGKey(0), *self.exmp_input_args, training=False, **self.exmp_input_kwargs))
 
     def create_jitted_functions(self):
         train_step, eval_step = self.create_functions()
@@ -262,7 +260,7 @@ class BaseTrainer:
         return dict(
             model_class_name=self.model_class.__name__,
             model_hparams=self.model_hparams,
-            exmp_input=self.exmp_input,
+            exmp_input_args=self.exmp_input_args,
             state=self.state,
         )
 
