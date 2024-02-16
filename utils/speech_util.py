@@ -103,7 +103,7 @@ def conditional_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         key, subkey = random.split(key)
         audio_token = audio_tokens[:, -1:]
         encoding, carry, logits = model.apply(
-            {'params': params}, audio_token, False, carry=carry, encoder_input=transcript_tokens, encoding=encoding,
+            {'params': params}, audio_token, False, decoder_carry=carry, encoder_input=transcript_tokens, encoding=encoding,
         )
         next_audio_token = random.categorical(subkey, logits[:, -1, :], shape=(batch_size,))
         audio_tokens = jnp.concatenate((audio_tokens, next_audio_token[:, None]), axis=1)
