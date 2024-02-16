@@ -1,4 +1,4 @@
-from data.speech import UnconditionedSpeechDataset, preprocess_speech
+from data.speech import ConditionedSpeechDataset, preprocess_speech
 from data.numpy_data_loader import NumpyDataLoader
 import torch
 from torch.utils.data import random_split
@@ -21,7 +21,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         speech_tokenizer_path = "/content/SpeechTokenizer"
         preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=model_hparams["max_seq_length_encoder"])
 
-    dataset = UnconditionedSpeechDataset(data_folder_path)
+    dataset = ConditionedSpeechDataset(data_folder_path)
     val_size = int(len(dataset) * val_fraction)
     train_size = len(dataset) - val_size
     torch.manual_seed(seed)
@@ -36,7 +36,10 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     num_epochs = 50
 
     model_trainer_hparams = dict(
-        exmp_input_args=(next(iter(train_loader))[1:],),
+        exmp_input_args=(next(iter(train_loader))[1],),
+        exmp_input_kwargs=dict(
+            encoder_input=next(iter(train_loader))[2]
+        ),
         val_every_n_steps=50,
         log_every_n_steps=50,
         num_epochs=num_epochs,
