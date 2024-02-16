@@ -76,8 +76,8 @@ def get_model_setup_dict(model_class_name, model_variation_name):
 
     general_model_hparams = dict(
         n_head=4,
-        n_layer_encoder=6,
-        n_layer_decoder=6,
+        n_layer_encoder=8,
+        n_layer_decoder=2,
         d_model=384,
         d_channel_mixing=384 * 4,
         eps=1e-5,
