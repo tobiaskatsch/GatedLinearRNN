@@ -6,6 +6,7 @@ from flax.linen import initializers
 
 
 class GateLoop(nn.Module):
+    d_model: int
     d_h: int
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
@@ -16,6 +17,8 @@ class GateLoop(nn.Module):
     def setup(self):
         self.n = 3 if self.use_tied_gates else 4
         self.proj = nn.Dense(self.d_h * self.n)
+        self.out_proj = nn.Dense(self.d_model)
+
         args = dict(
             d_h=self.d_h,
             input_activation=self.input_activation,
@@ -55,6 +58,7 @@ class GateLoop(nn.Module):
             h, y = self.model(carry, x)
         else:
             h, y = self.model(x, carry=carry)
+        y = self.out_proj(y)
         return h, y
 
 def binary_operator(e_i, e_j):

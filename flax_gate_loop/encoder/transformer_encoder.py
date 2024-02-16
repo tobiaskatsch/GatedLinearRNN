@@ -1,10 +1,10 @@
 from typing import Optional, Callable
-from flax_gate_loop.base_models.language_model import LanguageModel
+from flax_gate_loop.base_models.sequence_model import SequenceModel
 from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
 from flax_gate_loop.attention import MultiHeadSelfAttention
 
 
-class TransformerLM(LanguageModel):
+class TransformerEncoder(SequenceModel):
     n_layer: int
     d_model: int
     d_channel_mixing: int
@@ -30,6 +30,7 @@ class TransformerLM(LanguageModel):
             eps=self.eps,
             dropout=self.time_mixing_dropout,
             model=MultiHeadSelfAttention(
+                d_model=self.d_model,
                 d_h=self.d_h,
                 n_head=self.n_head,
                 use_causal_mask=self.use_causal_mask,

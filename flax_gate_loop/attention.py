@@ -20,6 +20,7 @@ def scaled_dot_product(q, k, v, mask=None):
 
 
 class MultiHeadSelfAttention(nn.Module):
+    d_model: int
     d_h: int
     n_head: int
     use_causal_mask: bool
@@ -30,6 +31,7 @@ class MultiHeadSelfAttention(nn.Module):
             kernel_init=nn.initializers.xavier_uniform(),
             bias_init=nn.initializers.zeros
         )
+        self.out_proj = nn.Dense(self.d_model)
 
     def __call__(self, x, mask=None):
         batch_size, seq_len, d_model = x.shape
@@ -50,10 +52,12 @@ class MultiHeadSelfAttention(nn.Module):
         output = scaled_dot_product(q, k, v, mask=combined_mask)
         output = output.transpose(0, 2, 1, 3)  # [Batch, SeqLen, Head, Dims]
         output = output.reshape(batch_size, seq_len, -1)
+        output = self.out_proj(output)
         return output
 
 
 class MultiHeadCrossAttention(nn.Module):
+    d_model: int
     d_h: int  # Dimensionality of the model / output size of each head
     n_head: int  # Number of attention heads
     use_causal_mask: bool  # Whether to use a causal mask (likely not needed for cross-attention)
@@ -61,6 +65,7 @@ class MultiHeadCrossAttention(nn.Module):
     def setup(self):
         self.q_proj = nn.Dense(self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.kv_proj = nn.Dense(2 * self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
+        self.out_proj = nn.Dense(self.d_model)
 
     def __call__(self, query, key_value, v_mask=None):
         batch_size, seq_len_query, _ = query.shape
@@ -85,7 +90,7 @@ class MultiHeadCrossAttention(nn.Module):
         output = scaled_dot_product(q, k, v, mask=None)
         output = output.transpose(0, 2, 1, 3)  # Back to [Batch, SeqLenQuery, Head, Dims]
         output = output.reshape(batch_size, seq_len_query, -1)
-
+        output = self.out_proj(output)
         return output
 
 
