@@ -14,9 +14,9 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     n_val_samples = 100
     n_test_samples = 500
 
-    train_set = AssociativeRecallDataset(model_hparams["vocab_size"], model_hparams["max_seq_length"], n_samples=n_training_samples, seed=seed)
-    val_set = AssociativeRecallDataset(model_hparams["vocab_size"], model_hparams["max_seq_length"], n_samples=n_val_samples, seed=seed+1)
-    test_set = AssociativeRecallDataset(model_hparams["vocab_size"], model_hparams["max_seq_length"], n_samples=n_test_samples, seed=seed+2)
+    train_set = AssociativeRecallDataset(30, model_hparams["max_seq_length"], n_samples=n_training_samples, seed=seed)
+    val_set = AssociativeRecallDataset(30, model_hparams["max_seq_length"], n_samples=n_val_samples, seed=seed+1)
+    test_set = AssociativeRecallDataset(30, model_hparams["max_seq_length"], n_samples=n_test_samples, seed=seed+2)
 
     train_loader = NumpyDataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                generator=torch.Generator().manual_seed(seed))
@@ -59,7 +59,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
 def get_model_setup_dict(model_class_name, model_variation_name):
 
-    vocab_size = 30
+    vocab_size = 32
     max_seq_length = 100
 
     general_model_hparams = dict(
