@@ -76,8 +76,13 @@ class GateLoopEncoderDecoder(nn.Module):
             **shared_kwargs
         )
 
-
-
+    def __call__(self, decoder_input, training: bool, encoder_input=None, encoding=None, decoder_carry=None, mask=None):
+        if encoding is None:
+            if encoder_input is None:
+                raise AttributeError("Either encoder_input or precomputed encoding required!")
+            encoding = self.encoder(encoder_input, training)
+        h, x = self.decoder(decoder_input, training, encoding, carry=decoder_carry)
+        return encoding, h, x
 
 
 class GateLoopCrossAttentionSequenceModel(CrossAttentionSequenceModel):
@@ -124,10 +129,4 @@ class GateLoopCrossAttentionSequenceModel(CrossAttentionSequenceModel):
                 )
             )
         self.time_mixing_layers = time_mixing_layers
-
-    def __call__(self, x, training: bool, carry=None, encoding=None, mask=None):
-        if encoding is None:
-            encoding = self.encoder(x)
-        h, x = self.decoder(x, training, encoding, carry=carry)
-        return h, x
 
