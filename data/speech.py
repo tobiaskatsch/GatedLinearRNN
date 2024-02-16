@@ -27,7 +27,7 @@ class ConditionedSpeechDataset(Dataset):
         #self.transcript_masks_sequences = np.load(transcript_masks_path, allow_pickle=True)       # (nr_sequences, max_phonetics)
 
     def __len__(self):
-        return len(self.sequences)
+        return len(self.audio_tokens_sequences)
     def __getitem__(self, index):
         targets = self.audio_tokens_sequences[index][1:]
         audio_tokens = self.audio_tokens_sequences[index][:-1]
