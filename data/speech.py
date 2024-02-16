@@ -3,7 +3,8 @@ from torch.utils.data import Dataset
 import os
 import numpy as np
 from tqdm import tqdm
-from utils.speech_util import tokenize_transcript
+from utils.speech_util import tokenize_transcript, normalize_waveform, tokenize_waveform
+
 
 class UnconditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
@@ -43,7 +44,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
 
     from speechtokenizer import SpeechTokenizer
-    import torchaudio
     from pytube import Playlist
     import os
     import torch
@@ -227,24 +227,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
                 with open(snippet_transcript_path, 'w') as file:
                     file.write(snippet_transcript)
 
-    def flatten_waveform_tokens(tokens, num_quantizers):
-        n_q, B, T = tokens.shape
-        transpose_tokens = tokens.transpose(0, 2)
-        return transpose_tokens.reshape(B, T * num_quantizers)
-
-    def normalize_waveform(waveform, sr, speech_tokenizer):
-        waveform = waveform.float()
-        waveform = waveform.reshape(1, -1)
-        waveform = torchaudio.functional.resample(waveform, sr, speech_tokenizer.sample_rate)
-        return waveform
-
-    def tokenize_waveform(waveform, speech_tokenizer, num_quantizers, device):
-        with torch.no_grad():
-            codes = speech_tokenizer.encode(waveform.unsqueeze(0).to(device))  # codes: (n_q, B, T)
-        semantic_tokens = codes[:num_quantizers, :, :].cpu()
-        semantic_tokens = flatten_waveform_tokens(semantic_tokens, num_quantizers)
-        return semantic_tokens
-
 
     if conditioned is True:
         from openai import OpenAI
@@ -311,14 +293,8 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
             with open(os.path.join(dir, "transcript.txt"), 'r') as file:
                 text = file.read()
 
-            tokens = tokenize_transcript(cmu_dict, text)
-            tokens = np.array(tokens)[:min(len(tokens), max_phonetics)]
-            tokens_padded = np.full(max_phonetics, 70, dtype=int)  # pad with 70 (UNK)
-            tokens_padded[:len(tokens)] = tokens
-            transcript_tokens.append(tokens_padded)
-
-            mask = np.zeros(max_phonetics, dtype=bool)
-            mask[:len(tokens)] = 1  # Mark original token positions with 1
+            tokens, mask = tokenize_transcript(cmu_dict, text, max_phonetics)
+            transcript_tokens.append(tokens)
             transcript_masks.append(mask)
 
         np.save(transcript_tokens_path, transcript_tokens)
