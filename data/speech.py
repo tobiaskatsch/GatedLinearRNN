@@ -38,9 +38,9 @@ class ConditionedSpeechDataset(Dataset):
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]
 
-def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned, snippet_length=10, num_quantizers=4, max_phonetics=100):
+def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, cmu_dict, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=100):
 
-    # Source: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
+    # Inspired by: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
 
     from speechtokenizer import SpeechTokenizer
@@ -50,13 +50,8 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     import shutil
     from moviepy.editor import AudioFileClip
     import json
-    from pydub import AudioSegment
-    import nltk
     from scipy.io import wavfile
-    from nltk.corpus import cmudict
     from scipy.ndimage import maximum_filter1d
-    nltk.download('cmudict')
-    cmu_dict = cmudict.dict()
 
     def download_audio_from_playlist(playlist_url, output_path):
         if not os.path.exists(output_path):

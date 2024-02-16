@@ -16,9 +16,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     data_folder_path = os.path.join(datasets_path, "speech")
 
     if fresh_preprocess:
-        playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5HXswvAhof-g1iihU3aJdKs&si=oNBfRFPW7FRG3eiY"
-        speech_tokenizer_path = "/content/SpeechTokenizer"
-        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=False, snippet_length=10, num_quantizers=4)
+        raise AttributeError("This dataset needs to be preprocessed manually!")
 
     dataset = UnconditionedSpeechDataset(data_folder_path)
     val_size = int(len(dataset) * val_fraction)
