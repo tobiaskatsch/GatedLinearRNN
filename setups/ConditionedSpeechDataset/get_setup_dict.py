@@ -14,8 +14,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     max_seq_length_encoder = 100
     max_seq_length_decoder = 2000
 
-    output_vocab_size = 1024
-
     batch_size = 16
     val_fraction = 0.05
 
@@ -53,17 +51,22 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     )
 
     general_model_hparams = dict(
-        n_layer=6,
+        n_layer_encoder=6,
+        n_layer_decoder=6,
         d_model=384,
         d_channel_mixing=384 * 4,
         eps=1e-5,
         channel_mixing_dropout=0.1,
         time_mixing_dropout=0.1,
-        input_vocab_size=input_vocab_size,
-        output_vocab_size=output_vocab_size,
-        max_seq_length=max_seq_length,
+        cross_attention_dropout=0.1,
+        input_vocab_size_encoder=input_vocab_size_encoder,
+        input_vocab_size_decoder=input_vocab_size_decoder,
+        output_vocab_size=input_vocab_size_decoder,
+        max_seq_length_encoder=max_seq_length_encoder,
+        max_seq_length_decoder=max_seq_length_decoder,
         embedding_dropout=0.1,
-        use_word_embedding=True,
+        use_word_embedding_encoder=True,
+        use_word_embedding_decoder=True,
         use_head=True,
     )
 

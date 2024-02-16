@@ -40,12 +40,12 @@ class CrossAttentionSequenceModel(SequenceModel):
         x = self.embedding_dropout_function(x, deterministic=not training)
         h = []
         for l, (cross_attention, time_mixing, channel_mixing) in enumerate(zip(self.cross_attention_layers, self.time_mixing_layers, self.channel_mixing_layers)):
+            h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None), mask=mask)
             residual = x
             x = self.layer_norm(x)
             x = self.cross_attention(x, encoding)
             x = x + residual
             x = self.dropout_function(x, deterministic=not training)
-            h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None), mask=mask)
             x = channel_mixing(x, training)
             h.append(h_l)
         h = jnp.stack(h, axis=1)
