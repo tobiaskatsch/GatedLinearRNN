@@ -38,12 +38,11 @@ class ConditionedSpeechDataset(Dataset):
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]
 
-def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, cmu_dict, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=100):
+def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, cmu_dict, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=100):
 
     # Inspired by: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
 
-    from speechtokenizer import SpeechTokenizer
     from pytube import Playlist
     import os
     import torch
@@ -73,24 +72,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, cmu
             timestamp_granularities=["word"]
         )
         return transcript.words
-
-    def snippify_transcript(words, segment_length, snippet_length):
-        # Calculate the number of fixed-size snippets within the entire segment
-        n = int(segment_length / snippet_length)
-        # Initialize the snippets list with empty strings
-        snippets = [''] * n
-
-        for word in words:
-            # Calculate the index of the snippet where the current word belongs
-            snippet_index = int(word['start'] / snippet_length)
-            # Ensure the word falls within the range of our predefined snippets
-            if 0 <= snippet_index < n:
-                if snippets[snippet_index]:
-                    snippets[snippet_index] += ' ' + word['word']
-                else:
-                    snippets[snippet_index] = word['word']
-
-        return snippets
 
     def process_speech_array(x, detection_threshold=0.01, pooling_seconds=0.2, fps=44100, start_offset_seconds=0.5):
         """
@@ -230,14 +211,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, cmu
     else:
         client = None
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    config_path = os.path.join(speech_tokenizer_path, "speechtokenizer_hubert_avg", "config.json")
-    ckpt_path = os.path.join(speech_tokenizer_path, "speechtokenizer_hubert_avg", "SpeechTokenizer.pt")
-    speech_tokenizer = SpeechTokenizer.load_from_checkpoint(config_path, ckpt_path).to(device)
-    speech_tokenizer.eval()
-
     mp4_path = os.path.join(data_folder_path, "mp4")
-
     download_audio_from_playlist(playlist_url, mp4_path)
 
     # Assumed file formats
