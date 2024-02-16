@@ -8,6 +8,8 @@ from jax import random
 import torchaudio
 import numpy as np
 import os
+from flax_gate_loop.encoder_decoder import GateLoopEncoderDecoder
+from flax_gate_loop.encoder import GateLoopEncoder, TransformerEncoder
 
 vocab = {
     'AA0': 0, 'AA1': 1, 'AA2': 2, 'AE0': 3, 'AE1': 4, 'AE2': 5, 'AH0': 6, 'AH1': 7, 'AH2': 8,

@@ -4,10 +4,12 @@ from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
+from flax_gate_loop.encoder_decoder import GateLoopEncoderDecoder
+from flax_gate_loop.encoder import GateLoopEncoder, TransformerEncoder
+
 
 def get_class_from_name(class_name):
     return globals()[class_name]
-
 
 
 def main(args):
