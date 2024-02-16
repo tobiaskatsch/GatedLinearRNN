@@ -6,7 +6,7 @@ from util import get_home_directory
 from jax import random
 import orbax
 
-def load_model(dataset_class_name, model_class_name, model_variation_name, exmp_input_args, exmp_input_kwargs, checkpoint_path):
+def load_model(dataset_class_name, model_class_name, model_variation_name, exmp_input_args, checkpoint_path, exmp_input_kwargs={}):
     model_hparams = get_model_setup_dict(dataset_class_name, model_class_name, model_variation_name)
     model_class = GateLoopEncoder
     model = model_class(**model_hparams)
