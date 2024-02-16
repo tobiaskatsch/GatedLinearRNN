@@ -1,9 +1,7 @@
+from run_experiment import get_class_from_name
 from setups.get_setup_dict import get_model_setup_dict
 from jax import random
 import orbax
-
-def get_class_from_name(class_name):
-    return globals()[class_name]
 
 def load_model(dataset_class_name, model_class_name, model_variation_name, exmp_input_args, checkpoint_path, exmp_input_kwargs={}):
     model_hparams = get_model_setup_dict(dataset_class_name, model_class_name, model_variation_name)
