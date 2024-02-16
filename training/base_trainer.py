@@ -3,17 +3,14 @@ from jax import random
 from copy import copy
 import optax
 import jax
-import time
-import jax.numpy as jnp
 import orbax.checkpoint
 from flax.training import orbax_utils
 from tqdm import tqdm
 from collections import defaultdict
-from typing import Any, Sequence, Optional, Tuple, Iterator, Dict, Callable, List
+from typing import Any, Optional, Iterator, Dict
 from pytorch_lightning.loggers import WandbLogger
-from util import run_model_init, is_unpackable, TrainState
+from utils.util import run_model_init, TrainState
 import os
-import time
 
 
 class BaseTrainer:

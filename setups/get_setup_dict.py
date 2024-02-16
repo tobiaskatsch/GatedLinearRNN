@@ -1,6 +1,6 @@
 import importlib
 import os
-from util import get_home_directory
+from utils.util import get_home_directory
 
 def get_setup_dict(dataset_class_name, model_class_name, model_variation_name, seed, num_workers, datasets_path, fresh_preprocess):
     if datasets_path is not None:

@@ -1,12 +1,6 @@
-import sys
 import os
-import jax
-from data.numpy_data_loader import NumpyDataLoader
-from flax_gate_loop.encoder.gate_loop_encoder import *
-from flax_gate_loop.encoder.transformer_encoder import *
-from flax_gate_loop.encoder_decoder.gate_loop_encoder_decoder import *
 from setups.get_setup_dict import get_setup_dict
-from util import get_home_directory
+from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
