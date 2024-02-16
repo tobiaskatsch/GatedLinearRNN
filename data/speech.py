@@ -37,7 +37,7 @@ class ConditionedSpeechDataset(Dataset):
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]
 
-def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditional, snippet_length=10, num_quantizers=4, max_phonetics=100):
+def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned, snippet_length=10, num_quantizers=4, max_phonetics=100):
 
     # Source: "2084: MarcRandbot: Speech Synthesis with Mamba" by Lukas Nel.
     # https://2084.substack.com/p/2084-marcrandbot-speech-synthesis
@@ -246,7 +246,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
         return semantic_tokens
 
 
-    if conditional is True:
+    if conditioned is True:
         from openai import OpenAI
         api_key = input("Please enter your OpenAI API key: ")
         client = OpenAI(api_key=api_key)
@@ -272,7 +272,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     segment_length = file_size_bytes / (sample_rate_hz * number_of_channels * bit_depth_bytes)  # 148.6s
     segment_length = int((segment_length // 10) * 10)  # Round to 140s
 
-    print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transcribe' if conditional else ''}")
+    print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transcribe' if conditioned else ''}")
     # 140s --> roughly 24MB < 25MB (upper limit of whisper)
     segments_path = os.path.join(data_folder_path, "segments")
     for file in tqdm(get_subdirs(mp4_path)):
@@ -304,7 +304,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
 
     transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
     transcript_masks_path = os.path.join(data_folder_path, "transcript_masks.npy")
-    if (not os.path.exists(transcript_tokens_path) or not os.path.exists(transcript_masks_path)) and conditional is True:
+    if (not os.path.exists(transcript_tokens_path) or not os.path.exists(transcript_masks_path)) and conditioned is True:
         print(f"Tokenize transcript (40 tokens)")
         transcript_tokens, transcript_masks = [], []
         for dir in tqdm(get_subdirs(snippets_path)):

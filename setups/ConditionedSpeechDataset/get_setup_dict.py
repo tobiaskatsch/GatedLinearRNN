@@ -3,13 +3,19 @@ from data.numpy_data_loader import NumpyDataLoader
 import torch
 from torch.utils.data import random_split
 import importlib
-from training.language_model_trainer import LanguageModelTrainer
+from training.encoder_decoder_language_model_trainer import EncoderDecoderLanguageModelTrainer
 import os
 
 def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, datasets_path, fresh_preprocess):
 
-    vocab_size = 1024
-    max_seq_length = 2000
+    input_vocab_size_encoder = 71
+    input_vocab_size_decoder = 1024
+
+    max_seq_length_encoder = 100
+    max_seq_length_decoder = 2000
+
+    output_vocab_size = 1024
+
     batch_size = 16
     val_fraction = 0.05
 
@@ -18,7 +24,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     if fresh_preprocess:
         playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5HXswvAhof-g1iihU3aJdKs&si=oNBfRFPW7FRG3eiY"
         speech_tokenizer_path = "/content/SpeechTokenizer"
-        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=False, snippet_length=10, num_quantizers=4)
+        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=max_seq_length_encoder)
 
     dataset = UnconditionedSpeechDataset(data_folder_path)
     val_size = int(len(dataset) * val_fraction)
@@ -26,8 +32,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     torch.manual_seed(seed)
     train_set, val_set = random_split(dataset, [train_size, val_size])
 
-    input_vocab_size = vocab_size
-    output_vocab_size = vocab_size
 
     train_loader = NumpyDataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers,
                                generator=torch.Generator().manual_seed(seed))
@@ -83,7 +87,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     )
 
     return dict(
-        model_trainer_class=LanguageModelTrainer,
+        model_trainer_class=EncoderDecoderLanguageModelTrainer,
         model_hparams=model_hparams,
         optimizer_hparams=optimizer_hparams,
         model_trainer_hparams=model_trainer_hparams,
