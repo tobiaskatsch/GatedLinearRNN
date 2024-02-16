@@ -81,7 +81,7 @@ def save_to_file(tok, filename, speech_tokenizer, num_quantizers, device):
 def save_waveform(filename, waveform):
     sf.write(filename, waveform[0, 0], 16000)
 
-def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, generation_time_seconds=5, rng=42, batch_size=10, num_quantizers=4, initial_token=623):
+def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4, initial_token=623):
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -89,7 +89,7 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, g
     key = random.PRNGKey(rng)
     tokens = jnp.array([[initial_token]] * batch_size)
     carry = None
-    for _ in tqdm(range(int(102.4*generation_time_seconds))):
+    for _ in tqdm(range(int(102.4*audio_length_seconds))):
         key, subkey = random.split(key)
         token = tokens[:, -1:]
         carry, logits = model.apply({'params': params}, token, training=False, carry=carry)
@@ -99,7 +99,7 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, g
         this_tokens = this_tokens.reshape(1, -1)
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
-def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, generation_time_seconds=5, rng=42, batch_size=10, num_quantizers=4, initial_token=623, max_phonetics=100):
+def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4, initial_token=623, max_phonetics=100):
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -111,7 +111,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     audio_tokens = jnp.array([[initial_token]] * batch_size)
     carry = None
     encoding = None
-    for _ in tqdm(range(int(102.4*generation_time_seconds))):
+    for _ in tqdm(range(int(102.4*audio_length_seconds))):
         key, subkey = random.split(key)
         audio_token = audio_tokens[:, -1:]
         encoding, carry, logits = model.apply(
