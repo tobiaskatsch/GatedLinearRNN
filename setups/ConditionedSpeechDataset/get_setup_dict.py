@@ -93,7 +93,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         use_head=True,
     )
 
-    module_name = f"setups.UnconditionedSpeechDataset.{model_class_name}"
+    module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"
     module = importlib.import_module(module_name)
     get_model_hparams = getattr(module, "get_model_hparams")
 
