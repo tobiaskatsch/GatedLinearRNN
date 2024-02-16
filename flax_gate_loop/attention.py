@@ -60,14 +60,13 @@ class MultiHeadCrossAttention(nn.Module):
     d_model: int
     d_h: int  # Dimensionality of the model / output size of each head
     n_head: int  # Number of attention heads
-    use_causal_mask: bool  # Whether to use a causal mask (likely not needed for cross-attention)
 
     def setup(self):
         self.q_proj = nn.Dense(self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.kv_proj = nn.Dense(2 * self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.out_proj = nn.Dense(self.d_model)
 
-    def __call__(self, query, key_value, v_mask=None):
+    def __call__(self, query, key_value):
         batch_size, seq_len_query, _ = query.shape
         _, seq_len_kv, _ = key_value.shape
 
@@ -81,11 +80,6 @@ class MultiHeadCrossAttention(nn.Module):
         kv = kv.reshape(batch_size, seq_len_kv, self.n_head, -1)
         kv = kv.transpose(0, 2, 1, 3)  # [Batch, Head, SeqLenKV, Dims]
         k, v = jnp.split(kv, 2, axis=-1)
-
-        if v_mask is not None:
-            # Reshape and broadcast v_mask to match the dimensions of v
-            v_mask = v_mask[:, None, :, None]  # Add dimensions for head and dims
-            v = jnp.where(v_mask, v, 0)  # Apply mask
 
         output = scaled_dot_product(q, k, v, mask=None)
         output = output.transpose(0, 2, 1, 3)  # Back to [Batch, SeqLenQuery, Head, Dims]

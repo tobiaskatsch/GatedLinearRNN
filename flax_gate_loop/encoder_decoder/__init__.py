@@ -1,2 +1,2 @@
-from ..encoder_decoder import GateLoopEncoderDecoderLM
+from .gate_loop_encoder_decoder import GateLoopEncoderDecoder
 

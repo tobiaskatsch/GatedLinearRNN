@@ -1,2 +1,2 @@
-from .gate_loop_encoder import GateLoopLM
-from .transformer_encoder import TransformerLM
+from .gate_loop_encoder import GateLoopEncoder
+from .transformer_encoder import TransformerEncoder
