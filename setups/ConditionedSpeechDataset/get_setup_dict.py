@@ -74,6 +74,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
     max_seq_length_decoder = 2000
 
     general_model_hparams = dict(
+        n_head=4,
         n_layer_encoder=6,
         n_layer_decoder=6,
         d_model=384,

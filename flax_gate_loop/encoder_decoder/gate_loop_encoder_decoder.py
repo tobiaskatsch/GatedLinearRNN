@@ -10,6 +10,7 @@ from flax_gate_loop.base_models.channel_mixing import ChannelMixing
 import jax.numpy as jnp
 
 class GateLoopEncoderDecoder(nn.Module):
+    n_head: int
     n_layer_encoder: int
     n_layer_decoder: int
     d_model: int
