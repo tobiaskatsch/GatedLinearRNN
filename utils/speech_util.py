@@ -7,7 +7,7 @@ from tqdm import tqdm
 from jax import random
 import torchaudio
 import numpy as np
-
+import os
 
 vocab = {
     'AA0': 0, 'AA1': 1, 'AA2': 2, 'AE0': 3, 'AE1': 4, 'AE2': 5, 'AH0': 6, 'AH1': 7, 'AH2': 8,
@@ -79,7 +79,7 @@ def save_to_file(tok, filename, speech_tokenizer, num_quantizers, device):
 def save_waveform(filename, waveform):
     sf.write(filename, waveform[0, 0], 16000)
 
-def unconditioned_generation(model, params, max_new_tokens=2000, rng=42, batch_size=10, initial_token=623):
+def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, max_new_tokens=2000, rng=42, batch_size=10, num_quantizers=4, initial_token=623):
     key = random.PRNGKey(rng)
     tokens = jnp.array([[initial_token]] * batch_size)
     carry = None
@@ -89,9 +89,11 @@ def unconditioned_generation(model, params, max_new_tokens=2000, rng=42, batch_s
         carry, logits = model.apply({'params': params}, token, training=False, carry=carry)
         next_token = random.categorical(subkey, logits[:, -1, :], shape=(batch_size,))
         tokens = jnp.concatenate((tokens, next_token[:, None]), axis=1)
-    return tokens
+    for b, this_tokens in enumerate(tokens):
+        this_tokens = this_tokens.reshape(1, -1)
+        save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
-def conditional_generation(text, cmu_dict, model, params, max_new_tokens=2000, rng=42, batch_size=10, initial_token=623, max_phonetics=100):
+def conditional_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, max_new_tokens=2000, rng=42, batch_size=10, num_quantizers=4, initial_token=623, max_phonetics=100):
     transcript_tokens, mask = tokenize_transcript(cmu_dict, text, max_phonetics)
     key = random.PRNGKey(rng)
     audio_tokens = jnp.array([[initial_token]] * batch_size)
@@ -105,5 +107,8 @@ def conditional_generation(text, cmu_dict, model, params, max_new_tokens=2000, r
         )
         next_audio_token = random.categorical(subkey, logits[:, -1, :], shape=(batch_size,))
         audio_tokens = jnp.concatenate((audio_tokens, next_audio_token[:, None]), axis=1)
-    return audio_tokens
+
+    for b, this_tokens in enumerate(audio_tokens):
+        this_tokens = this_tokens.reshape(1, -1)
+        save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
