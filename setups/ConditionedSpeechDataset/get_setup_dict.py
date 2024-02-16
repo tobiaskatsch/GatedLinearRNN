@@ -6,13 +6,10 @@ import importlib
 from training.encoder_decoder_language_model_trainer import EncoderDecoderLanguageModelTrainer
 import os
 
+
 def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, datasets_path, fresh_preprocess):
 
-    input_vocab_size_encoder = 71
-    input_vocab_size_decoder = 1024
-
-    max_seq_length_encoder = 100
-    max_seq_length_decoder = 2000
+    model_hparams = get_model_setup_dict(model_class_name, model_variation_name)
 
     batch_size = 16
     val_fraction = 0.05
@@ -22,7 +19,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     if fresh_preprocess:
         playlist_url = "https://youtube.com/playlist?list=PL6Sm8cBIf-5HXswvAhof-g1iihU3aJdKs&si=oNBfRFPW7FRG3eiY"
         speech_tokenizer_path = "/content/SpeechTokenizer"
-        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=max_seq_length_encoder)
+        preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, conditioned=True, snippet_length=10, num_quantizers=4, max_phonetics=model_hparams["max_seq_length_encoder"])
 
     dataset = UnconditionedSpeechDataset(data_folder_path)
     val_size = int(len(dataset) * val_fraction)
@@ -50,6 +47,32 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         debug=False,
     )
 
+
+    optimizer_hparams = dict(
+        lr=0.001,
+        warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
+        weight_decay=0.05,
+        b1=0.9,
+        b2=0.98,
+    )
+
+
+    return dict(
+        model_trainer_class=EncoderDecoderLanguageModelTrainer,
+        model_hparams=model_hparams,
+        optimizer_hparams=optimizer_hparams,
+        model_trainer_hparams=model_trainer_hparams,
+    )
+
+
+def get_model_setup_dict(model_class_name, model_variation_name):
+
+    input_vocab_size_encoder = 71
+    input_vocab_size_decoder = 1024
+
+    max_seq_length_encoder = 100
+    max_seq_length_decoder = 2000
+
     general_model_hparams = dict(
         n_layer_encoder=6,
         n_layer_decoder=6,
@@ -70,14 +93,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         use_head=True,
     )
 
-    optimizer_hparams = dict(
-        lr=0.001,
-        warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
-        weight_decay=0.05,
-        b1=0.9,
-        b2=0.98,
-    )
-
     module_name = f"setups.UnconditionedSpeechDataset.{model_class_name}"
     module = importlib.import_module(module_name)
     get_model_hparams = getattr(module, "get_model_hparams")
@@ -89,10 +104,8 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         **specific_model_hparams
     )
 
-    return dict(
-        model_trainer_class=EncoderDecoderLanguageModelTrainer,
-        model_hparams=model_hparams,
-        optimizer_hparams=optimizer_hparams,
-        model_trainer_hparams=model_trainer_hparams,
-    )
+    return model_hparams
+
+
+
 
