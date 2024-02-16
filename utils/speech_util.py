@@ -82,6 +82,10 @@ def save_waveform(filename, waveform):
     sf.write(filename, waveform[0, 0], 16000)
 
 def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, max_new_tokens=2000, rng=42, batch_size=10, num_quantizers=4, initial_token=623):
+
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
     key = random.PRNGKey(rng)
     tokens = jnp.array([[initial_token]] * batch_size)
     carry = None
@@ -96,6 +100,9 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, m
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
 def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, max_new_tokens=2000, rng=42, batch_size=10, num_quantizers=4, initial_token=623, max_phonetics=100):
+
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
     transcript_tokens, this_mask = tokenize_transcript(cmu_dict, text, max_phonetics)
     transcript_tokens = np.tile(transcript_tokens, (batch_size, 1))
