@@ -272,7 +272,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer_path, playlist_url, con
     segment_length = file_size_bytes / (sample_rate_hz * number_of_channels * bit_depth_bytes)  # 148.6s
     segment_length = int((segment_length // 10) * 10)  # Round to 140s
 
-    print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transribe' if conditional else ''}")
+    print(f"Convert mp4s to wav segments of filesize={file_size_mb} and segment_length={segment_length} {'and transcribe' if conditional else ''}")
     # 140s --> roughly 24MB < 25MB (upper limit of whisper)
     segments_path = os.path.join(data_folder_path, "segments")
     for file in tqdm(get_subdirs(mp4_path)):
