@@ -32,7 +32,7 @@ class CrossAttentionSequenceModel(SequenceModel):
             n_head=self.n_head,
         ) for _ in range(self.n_layer)]
 
-    def __call__(self, x, training: bool, encoding, carry=None, mask=None):
+    def __call__(self, x, encoding, training: bool, carry=None, mask=None):
         seq_length = x.shape[1]
         x = self.input_function(x)
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':

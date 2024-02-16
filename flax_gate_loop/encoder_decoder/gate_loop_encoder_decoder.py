@@ -82,7 +82,7 @@ class GateLoopEncoderDecoder(nn.Module):
             if encoder_input is None:
                 raise AttributeError("Either encoder_input or precomputed encoding required!")
             encoding = self.encoder(encoder_input, training)
-        h, x = self.decoder(decoder_input, training, encoding, carry=decoder_carry)
+        h, x = self.decoder(decoder_input, encoding, training, carry=decoder_carry)
         return encoding, h, x
 
 
