@@ -114,6 +114,8 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
     initial_length = len(text_tokens)
     text_tokens = np.tile(text_tokens, (batch_size, initial_length))
+    print(len(jnp.array(tokenize_transcript(cmu_dict, text))))
+    initial_length = 1
 
     key = random.PRNGKey(rng)
     speech_tokens = jnp.full((batch_size, initial_length), 623)
