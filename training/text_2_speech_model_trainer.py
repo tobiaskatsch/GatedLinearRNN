@@ -6,7 +6,8 @@ import optax
 class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
-        self.text_loss_scalar = 0.
+        self.top_k_acc = 5
+        self.text_loss_scalar = 3.
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
@@ -30,10 +31,13 @@ class Text2SpeechModelTrainer(BaseTrainer):
             loss = text_loss * self.text_loss_scalar + speech_loss
             return loss
 
-        def accuracy(logits, targets):
-            correct = jnp.sum(jnp.argmax(logits, axis=-1) == targets)
+        def accuracy(logits, targets, top_k=1):
+            top_k_predictions = jnp.argsort(logits, axis=-1)[..., -top_k:]
+            expanded_targets = jnp.expand_dims(targets, axis=-1)
+            correct = jnp.sum(jnp.any(top_k_predictions == expanded_targets, axis=-1))
             total = targets.size
-            return correct / total
+            accuracy = correct / total
+            return accuracy
 
         def cross_entropy_batch_loss_and_acc(params, batch):
             speech_targets, speech_tokens, text_targets, text_tokens = batch
@@ -45,10 +49,10 @@ class Text2SpeechModelTrainer(BaseTrainer):
             speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             loss = text_loss * self.text_loss_scalar + speech_loss
 
-            text_acc = accuracy(text_logits, text_targets)
+            text_top_k_acc = accuracy(text_logits, text_targets, top_k=self.top_k_acc)
             speech_acc = accuracy(speech_logits, speech_targets)
 
-            return loss, text_loss, speech_loss, text_acc, speech_acc
+            return loss, text_loss, speech_loss, text_top_k_acc, speech_acc
 
         def train_step(state, batch):
             step_rng = jax.random.fold_in(key=state.rng, data=state.step)
@@ -60,8 +64,8 @@ class Text2SpeechModelTrainer(BaseTrainer):
             return state, metrics
 
         def eval_step(state, batch):
-            loss, text_loss, speech_loss, text_acc, speech_acc = cross_entropy_batch_loss_and_acc(state.params, batch)
-            metrics = {'loss': loss, 'text_loss': text_loss, 'speech_loss': speech_loss, 'text_acc': text_acc, 'speech_acc': speech_acc}
+            loss, text_loss, speech_loss, text_top_k_acc, speech_acc = cross_entropy_batch_loss_and_acc(state.params, batch)
+            metrics = {'loss': loss, 'text_loss': text_loss, 'speech_loss': speech_loss, f'text_top_{self.top_k_acc}_acc': text_top_k_acc, 'speech_acc': speech_acc}
             return metrics
 
         return train_step, eval_step
