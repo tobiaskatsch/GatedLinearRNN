@@ -7,7 +7,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
         self.top_k_acc = 5
-        self.text_loss_scalar = 3.
+        self.text_loss_scalar = 10.
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
