@@ -115,7 +115,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     text_tokens = np.tile(text_tokens, (batch_size, 1))
 
     key = random.PRNGKey(rng)
-    speech_tokens = jax.random.randint(jax.random.PRNGKey(rng), (batch_size, initial_length), 0, 1024)
+    speech_tokens = jnp.full((batch_size, initial_length), 623)
     stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
 
     carry, text_logits, speech_logits = model.apply(
