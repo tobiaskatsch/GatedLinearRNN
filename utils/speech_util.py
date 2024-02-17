@@ -118,16 +118,16 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     speech_tokens = jnp.full((batch_size, initial_length), 623)
     stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
 
-    carry, text_logits, speech_logits = model.apply(
+    carry, speech_logits = model.apply(
         {'params': params}, stacked_tokens[:, :, :-1], False, carry=None # Feed initial sequence
     )
 
     next_speech_token = random.categorical(random.PRNGKey(1), speech_logits[:, -1, :], shape=(batch_size,))
     speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
 
-    next_text_token = random.categorical(random.PRNGKey(2), text_logits[:, -1, :], shape=(batch_size,))
+    #next_text_token = random.categorical(random.PRNGKey(2), text_logits[:, -1, :], shape=(batch_size,))
+    next_text_token = jnp.full((batch_size,), 1)
     text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
-
 
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_speech_tokens-initial_length-1)):
@@ -135,13 +135,14 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         speech_token = speech_tokens[:, -1:]
         text_token = text_tokens[:, -1:]
         stacked_token = jnp.stack((text_token, speech_token), axis=1)
-        carry, text_logits, speech_logits = model.apply(
+        carry, speech_logits = model.apply(
             {'params': params}, stacked_token, False, carry=carry
         )
         next_speech_token = random.categorical(subkey, speech_logits[:, -1, :], shape=(batch_size,))
         speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
 
-        next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
+        #next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
+        next_text_token = jnp.full((batch_size,), 1)
         text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
 
     for b, this_tokens in enumerate(speech_tokens):
