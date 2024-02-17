@@ -3,7 +3,7 @@ from data.numpy_data_loader import NumpyDataLoader
 import torch
 from torch.utils.data import random_split
 import importlib
-from training.text_2_speech_model_trainer import EncoderDecoderLanguageModelTrainer
+from training.text_2_speech_model_trainer import Text2SpeechModelTrainer
 import os
 
 
@@ -58,7 +58,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     )
 
     return dict(
-        model_trainer_class=EncoderDecoderLanguageModelTrainer,
+        model_trainer_class=Text2SpeechModelTrainer,
         model_hparams=model_hparams,
         optimizer_hparams=optimizer_hparams,
         model_trainer_hparams=model_trainer_hparams,
@@ -67,32 +67,19 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
 def get_model_setup_dict(model_class_name, model_variation_name):
 
-    input_vocab_size_encoder = 71
-    input_vocab_size_decoder = 1024
-
-    max_seq_length_encoder = 100
-    max_seq_length_decoder = 2000
-
     general_model_hparams = dict(
-        n_head=4,
-        n_layer_encoder=6,
-        n_layer_decoder=6,
+        n_layer=6,
         d_model=384,
         d_channel_mixing=384 * 4,
         eps=1e-5,
         channel_mixing_dropout=0.1,
         time_mixing_dropout=0.1,
-        cross_attention_dropout=0.1,
-        input_vocab_size_encoder=input_vocab_size_encoder,
-        input_vocab_size_decoder=input_vocab_size_decoder,
-        output_vocab_size=input_vocab_size_decoder,
-        max_seq_length_encoder=max_seq_length_encoder,
-        max_seq_length_decoder=max_seq_length_decoder,
-        embedding_dropout_encoder=0.,
-        embedding_dropout_decoder=0.98,
-        use_word_embedding_encoder=True,
-        use_word_embedding_decoder=True,
-        use_head=True,
+        speech_embedding_size=384,
+        text_embedding_size=384,
+        speech_vocab_size=71,
+        text_vocab_size=1024,
+        max_seq_length=2000,
+        embedding_dropout=0.1,
     )
 
     module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"
