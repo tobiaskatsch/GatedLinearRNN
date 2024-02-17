@@ -19,7 +19,7 @@ class Text2SpeechModel(nn.Module):
     text_vocab_size: int
     max_seq_length: int
     speech_embedding_dropout: float
-    test_embedding_dropout: float
+    text_embedding_dropout: float
     positional_encoding_mode: str
 
     def setup(self):
