@@ -18,7 +18,8 @@ class Text2SpeechModel(nn.Module):
     speech_vocab_size: int
     text_vocab_size: int
     max_seq_length: int
-    embedding_dropout: float
+    speech_embedding_dropout: float
+    test_embedding_dropout: float
     positional_encoding_mode: str
 
     def setup(self):
@@ -35,7 +36,9 @@ class Text2SpeechModel(nn.Module):
             pass
         else:
             raise NotImplementedError
-        self.embedding_dropout_function = nn.Dropout(rate=self.embedding_dropout)
+
+        self.text_embedding_dropout_function = nn.Dropout(rate=self.text_embedding_dropout)
+        self.speech_embedding_dropout_function = nn.Dropout(rate=self.speech_embedding_dropout)
 
         self.text_embedding = nn.Embed(self.text_vocab_size, self.text_embedding_size)
         self.speech_embedding = nn.Embed(self.speech_vocab_size, self.speech_embedding_size)
@@ -47,13 +50,14 @@ class Text2SpeechModel(nn.Module):
     def __call__(self, x, training: bool, carry=None):
         b, _, seq_length = x.shape  # (b, 2, seq_length)
         x_text = self.text_embedding(x[:, 0, :])
+        x_text = self.text_embedding_dropout_function(x_text, deterministic=not training)
         x_speech = self.speech_embedding(x[:, 1, :])
+        x_speech = self.speech_embedding_dropout_function(x_speech, deterministic=not training)
         x = jnp.concatenate((x_text, x_speech), axis=2)
         x = self.input_proj(x)
 
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':
             x = x + self.wpe(seq_length)
-        x = self.embedding_dropout_function(x, deterministic=not training)
         h = []
         for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None))

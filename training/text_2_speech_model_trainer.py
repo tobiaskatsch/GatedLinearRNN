@@ -6,7 +6,7 @@ import optax
 class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
-        self.text_loss_scalar = 100000.
+        self.text_loss_scalar = 1.
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
