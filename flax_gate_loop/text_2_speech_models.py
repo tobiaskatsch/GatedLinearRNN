@@ -35,6 +35,7 @@ class Text2SpeechModel(nn.Module):
             pass
         else:
             raise NotImplementedError
+        self.embedding_dropout_function = nn.Dropout(rate=self.embedding_dropout)
 
         self.text_embedding = nn.Embed(self.text_vocab_size, self.text_embedding_size)
         self.speech_embedding = nn.Embed(self.speech_vocab_size, self.speech_embedding_size)
