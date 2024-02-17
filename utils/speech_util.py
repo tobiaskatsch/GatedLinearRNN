@@ -33,6 +33,11 @@ def tokenize_transcript(cmu_dict, text):
         if word in cmu_dict:
             phonetics.extend(cmu_dict[word][0])
     tokens = []
+    for phonetic in phonetics:
+        if phonetic in vocab:
+            tokens.append(vocab[phonetic])
+        else:
+            tokens.append(vocab['UNK'])
     return tokens
 
 def pad(x, max_length, pad_with):
@@ -114,7 +119,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
     carry, _, speech_logits = model.apply(
         {'params': params}, stacked_tokens[:, :, :-1], False, carry=None # Feed initial sequence
-    ) 
+    )
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_speech_tokens-1)):
         key, subkey = random.split(key)
@@ -129,7 +134,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
 
         next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
         text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
-        
+
     for b, this_tokens in enumerate(speech_tokens):
         this_tokens = this_tokens.reshape(1, -1)
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
