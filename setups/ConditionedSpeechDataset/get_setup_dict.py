@@ -57,7 +57,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         b2=0.98,
     )
 
-
     return dict(
         model_trainer_class=EncoderDecoderLanguageModelTrainer,
         model_hparams=model_hparams,
@@ -90,7 +89,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         max_seq_length_encoder=max_seq_length_encoder,
         max_seq_length_decoder=max_seq_length_decoder,
         embedding_dropout_encoder=0.,
-        embedding_dropout_decoder=0.9,
+        embedding_dropout_decoder=1.,
         use_word_embedding_encoder=True,
         use_word_embedding_decoder=True,
         use_head=True,
