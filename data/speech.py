@@ -34,8 +34,8 @@ class ConditionedSpeechDataset(Dataset):
         speech_targets = self.speech_tokens_sequences[index][1:]
         speech_tokens = self.speech_tokens_sequences[index][:-1]
 
-        text_targets = self.text_tokens_sequences[index]
-        text_tokens = self.text_tokens_sequences[index]
+        text_targets = self.text_tokens_sequences[index][:-1]
+        text_tokens = self.text_tokens_sequences[index][:-1]
 
         return speech_targets, speech_tokens, text_targets, text_tokens
 
