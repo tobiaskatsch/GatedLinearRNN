@@ -106,6 +106,13 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
         this_tokens = this_tokens.reshape(1, -1)
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
+
+
+initial_speech_tokens = jnp.array(
+    [623, 501, 433, 832, 623, 501, 433, 832, 623, 501, 433, 832, 623, 501, 433, 832, 9, 501, 358, 60, 9, 501, 433, 60, 9, 501, 433, 60, 9, 501, 433, 938, 128, 501, 358, 938, 128, 501, 278, 187, 128, 501, 278, 187, 128, 501, 278, 187, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 717, 938, 128, 501, 717, 380, 128, 501, 87, 380, 128, 501, 988, 380, 128, 501, 988, 380, 128, 501, 988, 60, 128, 501, 988, 95, 128, 1005, 431, 15]
+)
+
+
 def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4):
 
     if not os.path.exists(out_dir):
@@ -114,11 +121,9 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
     initial_length = len(text_tokens)
     text_tokens = np.tile(text_tokens, (batch_size, initial_length))
-    print(len(jnp.array(tokenize_transcript(cmu_dict, text))))
-    initial_length = 1
 
     key = random.PRNGKey(rng)
-    speech_tokens = jnp.full((batch_size, initial_length), 623)
+    speech_tokens = initial_speech_tokens[:initial_length]
     stacked_tokens = jnp.stack((speech_tokens, speech_tokens), axis=1)
 
     carry, text_logits, speech_logits = model.apply(
