@@ -8,8 +8,9 @@ from jax import random
 import torchaudio
 import numpy as np
 import os
-from flax_gate_loop.text_2_speech_models import GateLoopEncoderDecoder
-from flax_gate_loop.language_models import GateLoopEncoder, TransformerEncoder
+from flax_gate_loop.text_2_speech_models import Text2SpeechModel
+from flax_gate_loop.language_models import GateLoopLM, TransformerLM
+
 
 vocab = {
     'AA0': 0, 'AA1': 1, 'AA2': 2, 'AE0': 3, 'AE1': 4, 'AE2': 5, 'AH0': 6, 'AH1': 7, 'AH2': 8,
