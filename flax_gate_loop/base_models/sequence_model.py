@@ -35,7 +35,6 @@ class SequenceModel(nn.Module):
             raise AttributeError("self.input_vocab_size is None and self.use_word_embedding")
         if self.use_head is True:
             self.head = nn.Dense(self.output_vocab_size)
-        super().setup()
         self.embedding_dropout_function = nn.Dropout(rate=self.embedding_dropout)
         if self.use_word_embedding:
             self.input_function = nn.Embed(self.input_vocab_size, self.d_model)

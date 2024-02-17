@@ -8,8 +8,8 @@ from jax import random
 import torchaudio
 import numpy as np
 import os
-from flax_gate_loop.encoder_decoder import GateLoopEncoderDecoder
-from flax_gate_loop.encoder import GateLoopEncoder, TransformerEncoder
+from flax_gate_loop.text_2_speech_models import GateLoopEncoderDecoder
+from flax_gate_loop.language_models import GateLoopEncoder, TransformerEncoder
 
 vocab = {
     'AA0': 0, 'AA1': 1, 'AA2': 2, 'AE0': 3, 'AE1': 4, 'AE2': 5, 'AH0': 6, 'AH1': 7, 'AH2': 8,
@@ -93,7 +93,7 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
     tokens = jnp.array([[initial_token]] * batch_size)
 
     carry = None
-    max_audio_tokens = round_up_to_nearest_four(int(102.4 * audio_length_seconds))  # such that quantization works
+    max_audio_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_audio_tokens-1)):
         key, subkey = random.split(key)
         token = tokens[:, -1:]
@@ -116,7 +116,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     audio_tokens = jnp.array([[initial_token]] * batch_size)
     carry = None
     encoding = None
-    max_audio_tokens = round_up_to_nearest_four(int(102.4 * audio_length_seconds))  # such that quantization works
+    max_audio_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_audio_tokens-1)):
         key, subkey = random.split(key)
         audio_token = audio_tokens[:, -1:]

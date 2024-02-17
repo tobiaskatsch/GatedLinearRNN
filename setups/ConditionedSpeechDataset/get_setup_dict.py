@@ -3,7 +3,7 @@ from data.numpy_data_loader import NumpyDataLoader
 import torch
 from torch.utils.data import random_split
 import importlib
-from training.encoder_decoder_language_model_trainer import EncoderDecoderLanguageModelTrainer
+from training.text_2_speech_model_trainer import EncoderDecoderLanguageModelTrainer
 import os
 
 

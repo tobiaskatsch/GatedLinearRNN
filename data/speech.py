@@ -8,7 +8,7 @@ from utils.speech_util import tokenize_transcript, normalize_waveform, tokenize_
 
 class UnconditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
-        file_path = os.path.join(data_folder_path, 'audio_tokens.npy')
+        file_path = os.path.join(data_folder_path, 'speech_tokens.npy')
         self.sequences = np.load(file_path, allow_pickle=True)  # (nr_sequences, seq_len)
     def __len__(self):
         return len(self.sequences)
@@ -19,21 +19,25 @@ class UnconditionedSpeechDataset(Dataset):
 
 class ConditionedSpeechDataset(Dataset):
     def __init__(self, data_folder_path):
-        audio_tokens_path = os.path.join(data_folder_path, 'audio_tokens.npy')
-        transcript_tokens_path = os.path.join(data_folder_path, 'transcript_tokens.npy')
-        #transcript_masks_path = os.path.join(data_folder_path, "transcript_masks.npy")
-        self.audio_tokens_sequences = np.load(audio_tokens_path, allow_pickle=True)               # (nr_sequences, seq_len)
-        self.transcript_tokens_sequences = np.load(transcript_tokens_path, allow_pickle=True)     # (nr_sequences, max_phonetics)
-        #self.transcript_masks_sequences = np.load(transcript_masks_path, allow_pickle=True)       # (nr_sequences, max_phonetics)
+        speech_tokens_path = os.path.join(data_folder_path, 'speech_tokens.npy')
+        self.speech_tokens_sequences = np.load(speech_tokens_path, allow_pickle=True)
+
+        text_tokens_path = os.path.join(data_folder_path, 'text_tokens.npy')
+        text_targets_path = os.path.join(data_folder_path, 'text_targets.npy')
+        self.text_tokens_sequences = np.load(text_tokens_path, allow_pickle=True)
+        self.text_targets_sequences = np.load(text_targets_path, allow_pickle=True)
 
     def __len__(self):
-        return len(self.audio_tokens_sequences)
+            return len(self.text_tokens_sequences)
+
     def __getitem__(self, index):
-        targets = self.audio_tokens_sequences[index][1:]
-        audio_tokens = self.audio_tokens_sequences[index][:-1]
-        transcript_tokens = self.transcript_tokens_sequences[index]
-        #transcript_masks = self.transcript_masks_sequences[index]
-        return targets, audio_tokens, transcript_tokens #, transcript_masks
+        speech_targets = self.speech_tokens_sequences[index][1:]
+        speech_tokens = self.speech_tokens_sequences[index][:-1]
+
+        text_targets = self.text_tokens_sequences[index]
+        text_tokens = self.text_tokens_sequences[index]
+
+        return speech_targets, speech_tokens, text_targets, text_tokens
 
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]
@@ -181,7 +185,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
                 os.makedirs(snippet_path)
 
             snippet_audio_path = os.path.join(snippet_path, "audio.wav")
-            snippet_transcript_path = os.path.join(snippet_path, "transcript.txt")
+            snippet_transcript_path = os.path.join(snippet_path, "transcript.json")
 
             if not os.path.exists(snippet_audio_path) or not os.path.exists(snippet_transcript_path):
                 snippet_array = segment_array[start_seconds * sr:end_seconds * sr]
@@ -195,13 +199,20 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
                 # substract avg_word_length_seconds because "start" counts from the full detection and not from the start of speech
                 snippet_transcript = get_within(snippet_transcript, min_seconds + start_seconds - avg_word_length_seconds,
                                                 max_seconds + start_seconds)
-                snippet_transcript = transcript_to_txt(snippet_transcript)
+
+                new_snippet_transcript = []
+                for word in snippet_transcript:
+                    new_word = word.copy()
+                    new_word["start"] = new_word["start"] - start_seconds
+                    new_word["end"] = new_word["end"] - start_seconds
+                    new_snippet_transcript.append(new_word)
+                snippet_transcript = new_snippet_transcript
 
                 clip_array_int16 = np.int16(snippet_array * 32767)
                 wavfile.write(snippet_audio_path, 44100, clip_array_int16)
 
-                with open(snippet_transcript_path, 'w') as file:
-                    file.write(snippet_transcript)
+                with open(snippet_transcript_path, 'w') as json_file:
+                    json.dump(snippet_transcript, json_file)
 
 
     if conditioned is True:
@@ -234,10 +245,10 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
     for dir in tqdm(get_subdirs(segments_path)):
         process_snippets(dir, snippets_path, snippet_length)
 
-    audio_tokens_path = os.path.join(data_folder_path, "audio_tokens.npy")
-    if not os.path.exists(audio_tokens_path):
+    speech_tokens_path = os.path.join(data_folder_path, "speech_tokens.npy")
+    if not os.path.exists(speech_tokens_path):
         print(f"Tokenize audio (1024 tokens)")
-        audio_tokens = []
+        speech_tokens = []
         for dir in tqdm(get_subdirs(snippets_path)):
             sample_rate, x = wavfile.read(os.path.join(dir, "audio.wav"))
             x = torch.from_numpy(x)
@@ -250,24 +261,37 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
             x = tokenize_waveform(x, speech_tokenizer, num_quantizers, device)
             x = x.cpu().numpy()
             x = x.reshape(-1)
-            audio_tokens.append(x)
-        np.save(audio_tokens_path, audio_tokens)
+            speech_tokens.append(x)
+        np.save(speech_tokens_path, speech_tokens)
 
-    transcript_tokens_path = os.path.join(data_folder_path, "transcript_tokens.npy")
-    transcript_masks_path = os.path.join(data_folder_path, "transcript_masks.npy")
-    if (not os.path.exists(transcript_tokens_path) or not os.path.exists(transcript_masks_path)) and conditioned is True:
-        print(f"Tokenize transcript (40 tokens)")
-        transcript_tokens, transcript_masks = [], []
-        for dir in tqdm(get_subdirs(snippets_path)):
-            with open(os.path.join(dir, "transcript.txt"), 'r') as file:
-                text = file.read()
+    data_shape = np.load(speech_tokens_path, allow_pickle=True).shape
+    seq_length = data_shape[1]
 
-            tokens, mask = tokenize_transcript(cmu_dict, text, max_phonetics)
-            transcript_tokens.append(tokens)
-            transcript_masks.append(mask)
+    text_tokens_path = os.path.join(data_folder_path, "text_tokens.npy")
+    text_targets_path = os.path.join(data_folder_path, "text_targets.npy")
 
-        np.save(transcript_tokens_path, transcript_tokens)
-        np.save(transcript_masks_path, transcript_masks)
+    text_tokens = np.full(data_shape, 71, dtype=int)
+    text_targets = np.full(data_shape, 71, dtype=int)
+
+    def sec_to_idx(time_s, snippet_length, seq_length):
+        return int(min(((seq_length / snippet_length) * time_s), seq_length))
+
+    if (not os.path.exists(text_tokens_path) or not os.path.exists(text_targets_path)) and conditioned is True:
+        print(f"Tokenize transcript (71 tokens)")
+        for data_idx, dir in enumerate(tqdm(get_subdirs(snippets_path))):
+            with open(os.path.join(dir, "transcript.json")) as json_file:
+                segment_transcript = json.load(json_file)
+            for word_idx, this_dict in enumerate(segment_transcript):
+                word_start_idx = sec_to_idx(this_dict["start"], snippet_length, seq_length)
+                word_end_idx = sec_to_idx(this_dict["end"], snippet_length, seq_length)
+                tokens, _ = tokenize_transcript(cmu_dict, this_dict["word"], max_phonetics)
+                indices = np.linspace(word_start_idx, word_end_idx, len(tokens)+1, dtype=int)
+                for token_idx, token in enumerate(tokens):
+                    text_tokens[data_idx, word_idx + token_idx] = token
+                    text_targets[data_idx, (word_start_idx + indices[token_idx]):(word_start_idx + indices[token_idx+1])] = token
+
+        np.save(text_tokens_path, text_tokens)
+        np.save(text_targets_path, text_targets)
 
 
 

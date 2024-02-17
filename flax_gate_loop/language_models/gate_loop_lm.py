@@ -4,7 +4,7 @@ from typing import Optional, Callable
 from flax_gate_loop.gate_loop import GateLoop
 from flax import linen as nn
 
-class GateLoopEncoder(SequenceModel):
+class GateLoopLM(SequenceModel):
     n_layer: int
     d_model: int
     d_channel_mixing: int

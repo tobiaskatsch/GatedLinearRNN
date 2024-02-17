@@ -4,7 +4,7 @@ from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
 from flax_gate_loop.attention import MultiHeadSelfAttention
 
 
-class TransformerEncoder(SequenceModel):
+class TransformerLM(SequenceModel):
     n_layer: int
     d_model: int
     d_channel_mixing: int

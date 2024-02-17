@@ -1,3 +1,3 @@
 from .gate_loop import GateLoop
-from flax_gate_loop.encoder import GateLoopEncoder
-from flax_gate_loop.encoder_decoder import GateLoopEncoderDecoder
+from flax_gate_loop.language_models import GateLoopLM
+from flax_gate_loop.text_2_speech_models import GateLoopText2Speech

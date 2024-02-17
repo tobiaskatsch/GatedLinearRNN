@@ -64,7 +64,7 @@ We provide 2 main modules:
   - **Tied Input & Forget gate** (`use_tied_gates=True`) Ties the input and forget gate through the relation `forget_gate = 1-input_gate`.
 
 
-- ## [gate_loop_lm.py](flax_gate_loop/encoder/gate_loop_encoder.py)
+- ## [gate_loop_lm.py](flax_gate_loop/language_models/gate_loop_lm.py)
   A GateLoop-based language model.
   ```
   import jax
