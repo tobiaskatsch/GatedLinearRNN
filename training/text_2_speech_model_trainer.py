@@ -6,9 +6,9 @@ import optax
 class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
-        self.top_k_acc = 5
-        self.text_loss_scalar = 1.
-        self.speech_loss_scalar = 0.
+        self.top_k_acc = 1
+        self.text_loss_scalar = 0.
+        self.speech_loss_scalar = 1.
         super().__init__(*args, **kwargs)
 
     def create_functions(self):

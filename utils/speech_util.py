@@ -22,6 +22,11 @@ vocab = {
     'V': 65, 'W': 66, 'Y': 67, 'Z': 68, 'ZH': 69, 'UNK': 70, 'POOL': 71
 }
 
+def detokenize_text(t):
+    for key, value in vocab.items():
+        if value == t:
+            return key
+
 
 def tokenize_transcript(cmu_dict, text):
     # Remove special characters, keeping only letters and whitespaces
