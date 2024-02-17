@@ -66,6 +66,7 @@ class Text2SpeechModel(nn.Module):
         return h, text_logits, speech_logits
 
 
+
 class GateLoopText2SpeechModel(Text2SpeechModel):
     n_layer: int
     d_model: int
