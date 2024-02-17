@@ -110,10 +110,24 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
+    #text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
+    #initial_length = len(text_tokens)
+    #text_tokens = np.tile(text_tokens, (batch_size, 1))
 
     key = random.PRNGKey(rng)
-    speech_tokens = jnp.array([[623]] * batch_size)
-    carry = None
+    speech_tokens = jnp.full((batch_size, 1), 623)
+    stacked_tokens = jnp.stack((speech_tokens, speech_tokens), axis=1)
+
+    carry, speech_logits = model.apply(
+        {'params': params}, stacked_tokens[:, :, :], False, carry=None # Feed initial sequence
+    )
+
+    next_speech_token = random.categorical(random.PRNGKey(1), speech_logits[:, -1, :], shape=(batch_size,))
+    speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
+
+    #next_text_token = random.categorical(random.PRNGKey(2), text_logits[:, -1, :], shape=(batch_size,))
+    #next_text_token = jnp.full((batch_size,), 1)
+    #text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
 
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_speech_tokens-1)):
