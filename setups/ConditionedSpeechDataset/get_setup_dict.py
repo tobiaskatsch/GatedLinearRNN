@@ -5,7 +5,7 @@ from torch.utils.data import random_split
 import importlib
 from training.text_2_speech_model_trainer import Text2SpeechModelTrainer
 import os
-
+import numpy as np
 
 def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, datasets_path, fresh_preprocess):
 
@@ -33,8 +33,12 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
     num_epochs = 50
 
+
+    speech_targets, speech_tokens, text_targets, text_tokens = next(iter(train_loader))
+    stacked_tokens = np.stack((text_tokens, speech_tokens), axis=1)
+
     model_trainer_hparams = dict(
-        exmp_input_args=(next(iter(train_loader))[1],),
+        exmp_input_args=(stacked_tokens,),
         val_every_n_steps=50,
         log_every_n_steps=50,
         num_epochs=num_epochs,
