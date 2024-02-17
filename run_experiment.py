@@ -4,8 +4,8 @@ from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
-from flax_gate_loop.text_2_speech_models import GateLoopEncoderDecoder
-from flax_gate_loop.language_models import GateLoopEncoder, TransformerEncoder
+from flax_gate_loop.text_2_speech_models import GateLoopText2SpeechModel
+from flax_gate_loop.language_models import GateLoopLM, TransformerLM
 
 
 def get_class_from_name(class_name):

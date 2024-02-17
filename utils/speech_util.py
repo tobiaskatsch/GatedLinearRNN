@@ -9,7 +9,6 @@ import torchaudio
 import numpy as np
 import os
 from flax_gate_loop.text_2_speech_models import GateLoopText2SpeechModel
-from flax_gate_loop.language_models import GateLoopLM, TransformerLM
 
 
 vocab = {
