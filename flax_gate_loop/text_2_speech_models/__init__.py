@@ -1,2 +1,2 @@
-from .gate_loop_text_2_speech import Text2SpeechModel
+from .gate_loop_text_2_speech import GateLoopText2SpeechModel
 

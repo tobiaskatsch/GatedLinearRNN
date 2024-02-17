@@ -1,3 +1,3 @@
 from .gate_loop import GateLoop
 from flax_gate_loop.language_models import GateLoopLM
-from flax_gate_loop.text_2_speech_models import GateLoopText2Speech
+from flax_gate_loop.text_2_speech_models import GateLoopText2SpeechModel
