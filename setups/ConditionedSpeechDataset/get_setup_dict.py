@@ -78,7 +78,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         speech_embedding_size=384,
         text_embedding_size=384,
         speech_vocab_size=1024,
-        text_vocab_size=71,
+        text_vocab_size=72,
         max_seq_length=2000,
         embedding_dropout=0.1,
     )
