@@ -8,7 +8,7 @@ def load_model(dataset_class_name, model_class_name, model_variation_name, exmp_
     model_class = get_class_from_name(model_class_name)
     model = model_class(**model_hparams)
     init_rng = random.PRNGKey(0)
-    _ = model.init(init_rng, *exmp_input_args, training=False, **exmp_input_kwargs)
+    _ = model.init(init_rng, *exmp_input_args, False, **exmp_input_kwargs)
     checkpointer = orbax.checkpoint.PyTreeCheckpointer()
     raw_restored = checkpointer.restore(checkpoint_path)
     params = raw_restored["state"]["params"]
