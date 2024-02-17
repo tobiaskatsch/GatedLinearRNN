@@ -8,6 +8,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
     def __init__(self, *args, **kwargs):
         self.top_k_acc = 5
         self.text_loss_scalar = 10.
+        self.speech_loss_scalar = 0.
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
@@ -28,7 +29,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
             )
             text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets)
             speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
-            loss = text_loss * self.text_loss_scalar + speech_loss
+            loss = text_loss * self.text_loss_scalar + speech_loss * self.speech_loss_scalar
             return loss
 
         def accuracy(logits, targets, top_k=1):
@@ -47,7 +48,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
             )
             text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets)
             speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
-            loss = text_loss * self.text_loss_scalar + speech_loss
+            loss = text_loss * self.text_loss_scalar + speech_loss * self.speech_loss_scalar
 
             text_top_k_acc = accuracy(text_logits, text_targets, top_k=self.top_k_acc)
             speech_acc = accuracy(speech_logits, speech_targets)
