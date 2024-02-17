@@ -111,9 +111,11 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
-    initial_length = len(text_tokens)
-    text_tokens = np.tile(text_tokens, (batch_size, initial_length))
+    #text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
+    #initial_length = len(text_tokens)
+    #text_tokens = np.tile(text_tokens, (batch_size, initial_length))
+    print(len(jnp.array(tokenize_transcript(cmu_dict, text))))
+    initial_length = 1
 
     key = random.PRNGKey(rng)
     speech_tokens = jnp.full((batch_size, initial_length), 623)
@@ -123,8 +125,8 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         {'params': params}, stacked_tokens, False, carry=None # Feed initial sequence
     )
 
-    next_text_token = random.categorical(random.PRNGKey(1), text_logits[:, -1, :], shape=(batch_size,))
-    text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
+    #next_text_token = random.categorical(random.PRNGKey(1), text_logits[:, -1, :], shape=(batch_size,))
+    #text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
 
     next_speech_token = random.categorical(random.PRNGKey(1), speech_logits[:, -1, :], shape=(batch_size,))
     speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
@@ -132,15 +134,14 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
     for _ in tqdm(range(max_speech_tokens-initial_length-1)):
         key, subkey = random.split(key)
-        text_token = text_tokens[:, -1:]
+        #text_token = text_tokens[:, -1:]
         speech_token = speech_tokens[:, -1:]
         stacked_token = jnp.stack((speech_token, speech_token), axis=1)
         carry, text_logits, speech_logits = model.apply(
             {'params': params}, stacked_token, False, carry=carry
         )
-        next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
-        text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
-
+        #next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
+        #text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
         next_speech_token = random.categorical(subkey, speech_logits[:, -1, :], shape=(batch_size,))
         speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
 
