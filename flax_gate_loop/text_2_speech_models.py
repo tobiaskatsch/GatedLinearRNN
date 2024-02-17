@@ -83,7 +83,8 @@ class GateLoopText2SpeechModel(Text2SpeechModel):
     speech_vocab_size: int
     text_vocab_size: int
     max_seq_length: int
-    embedding_dropout: float
+    speech_embedding_dropout: float
+    text_embedding_dropout: float
     positional_encoding_mode: str
 
     d_h: int
