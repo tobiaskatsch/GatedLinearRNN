@@ -134,7 +134,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         key, subkey = random.split(key)
         text_token = text_tokens[:, -1:]
         speech_token = speech_tokens[:, -1:]
-        stacked_token = jnp.stack((text_token, speech_token), axis=1)
+        stacked_token = jnp.stack((speech_token, speech_token), axis=1)
         carry, text_logits, speech_logits = model.apply(
             {'params': params}, stacked_token, False, carry=carry
         )
