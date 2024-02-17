@@ -23,7 +23,7 @@ vocab = {
 }
 
 
-def tokenize_transcript(cmu_dict, text, max_phonetics):
+def tokenize_transcript(cmu_dict, text):
     # Remove special characters, keeping only letters and whitespaces
     clean_text = re.sub(r'[^a-zA-Z\s]', '', text)
     words = clean_text.split()
@@ -33,16 +33,13 @@ def tokenize_transcript(cmu_dict, text, max_phonetics):
         if word in cmu_dict:
             phonetics.extend(cmu_dict[word][0])
     tokens = []
-    for phoenetic in phonetics:
-        if phoenetic in vocab.keys():
-            tokens.append(vocab[phoenetic])
-    tokens = np.array(tokens)[:min(len(tokens), max_phonetics)]
-    tokens_padded = np.full(max_phonetics, 70, dtype=int)  # pad with 70 (UNK)
-    tokens_padded[:len(tokens)] = tokens
-    mask = np.zeros(max_phonetics, dtype=bool)
-    mask[:len(tokens)] = 1  # Mark original token positions with 1
-    return tokens_padded, mask
+    return tokens
 
+def pad(x, max_length, pad_with):
+    x = np.array(x)[:min(len(x), max_length)]
+    x_padded = np.full(max_length, pad_with, dtype=int)  # pad with 70 (UNK)
+    x_padded[:len(x)] = x
+    return x_padded
 
 def flatten_waveform_tokens(tokens, num_quantizers):
     n_q, B, T = tokens.shape
@@ -93,8 +90,8 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
     tokens = jnp.array([[initial_token]] * batch_size)
 
     carry = None
-    max_audio_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
-    for _ in tqdm(range(max_audio_tokens-1)):
+    max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
+    for _ in tqdm(range(max_speech_tokens-1)):
         key, subkey = random.split(key)
         token = tokens[:, -1:]
         carry, logits = model.apply({'params': params}, token, training=False, carry=carry)
@@ -104,29 +101,35 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
         this_tokens = this_tokens.reshape(1, -1)
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
 
-def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4, initial_token=623, max_phonetics=100):
+def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4):
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-
-    transcript_tokens, this_mask = tokenize_transcript(cmu_dict, text, max_phonetics)
-    transcript_tokens = np.tile(transcript_tokens, (batch_size, 1))
+    text_tokens = jnp.array(tokenize_transcript(cmu_dict, text))
+    initial_length = len(text_tokens)
+    text_tokens = np.tile(text_tokens, (batch_size, 1))
 
     key = random.PRNGKey(rng)
-    audio_tokens = jnp.array([[initial_token]] * batch_size)
-    carry = None
-    encoding = None
-    max_audio_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
-    for _ in tqdm(range(max_audio_tokens-1)):
+    speech_tokens = jax.random.randint(jax.random.PRNGKey(rng), (batch_size, initial_length), 0, 1024)
+    stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
+    carry, _, speech_logits = model.apply(
+        {'params': params}, stacked_tokens[:, :, :-1], False, carry=None # Feed initial sequence
+    ) 
+    max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
+    for _ in tqdm(range(max_speech_tokens-1)):
         key, subkey = random.split(key)
-        audio_token = audio_tokens[:, -1:]
-        encoding, carry, logits = model.apply(
-            {'params': params}, audio_token, False, decoder_carry=carry, encoder_input=transcript_tokens, encoding=encoding,
+        speech_token = speech_tokens[:, -1:]
+        text_token = text_tokens[:, -1:]
+        stacked_token = jnp.stack((text_token, speech_token), axis=1)
+        carry, text_logits, speech_logits = model.apply(
+            {'params': params}, stacked_token, False, carry=carry
         )
-        next_audio_token = random.categorical(subkey, logits[:, -1, :], shape=(batch_size,))
-        audio_tokens = jnp.concatenate((audio_tokens, next_audio_token[:, None]), axis=1)
+        next_speech_token = random.categorical(subkey, speech_logits[:, -1, :], shape=(batch_size,))
+        speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
 
-    for b, this_tokens in enumerate(audio_tokens):
+        next_text_token = random.categorical(subkey, text_logits[:, -1, :], shape=(batch_size,))
+        text_tokens = jnp.concatenate((text_tokens, next_text_token[:, None]), axis=1)
+        
+    for b, this_tokens in enumerate(speech_tokens):
         this_tokens = this_tokens.reshape(1, -1)
         save_to_file(this_tokens, os.path.join(out_dir, f"generated_{b}.wav"), speech_tokenizer, num_quantizers, device)
-

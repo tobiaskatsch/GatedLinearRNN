@@ -284,7 +284,7 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
             for word_idx, this_dict in enumerate(segment_transcript):
                 word_start_idx = sec_to_idx(this_dict["start"], snippet_length, seq_length)
                 word_end_idx = sec_to_idx(this_dict["end"], snippet_length, seq_length)
-                tokens, _ = tokenize_transcript(cmu_dict, this_dict["word"], max_phonetics)
+                tokens = tokenize_transcript(cmu_dict, this_dict["word"])
                 indices = np.linspace(word_start_idx, word_end_idx, len(tokens)+1, dtype=int)
                 for token_idx, token in enumerate(tokens):
                     text_tokens[data_idx, word_idx + token_idx] = token
