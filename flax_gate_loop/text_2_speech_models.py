@@ -1,9 +1,9 @@
 from flax import linen as nn
 import jax.numpy as jnp
-from flax_gate_loop.base_models.channel_mixing import ChannelMixing
-from flax_gate_loop.base_models.sequence_model import SinusoidalPositionalEncoding
-from flax_gate_loop.gate_loop import GateLoop
-from flax_gate_loop.base_models import CausalTimeMixing
+from .base_models.channel_mixing import ChannelMixing
+from .base_models.sequence_model import SinusoidalPositionalEncoding
+from .gate_loop import GateLoop
+from .base_models import CausalTimeMixing
 from typing import Optional, Callable
 
 class Text2SpeechModel(nn.Module):
