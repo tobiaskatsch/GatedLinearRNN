@@ -24,7 +24,8 @@ class GateLoopEncoderDecoder(nn.Module):
     output_vocab_size: int
     max_seq_length_encoder: int
     max_seq_length_decoder: int
-    embedding_dropout: float
+    embedding_dropout_encoder: float
+    embedding_dropout_decoder: float
     use_word_embedding_encoder: bool
     use_word_embedding_decoder: bool
     positional_encoding_mode: str
@@ -43,7 +44,6 @@ class GateLoopEncoderDecoder(nn.Module):
             "eps": self.eps,
             "channel_mixing_dropout": self.channel_mixing_dropout,
             "time_mixing_dropout": self.time_mixing_dropout,
-            "embedding_dropout": self.embedding_dropout,
             "positional_encoding_mode": self.positional_encoding_mode,
             "d_h": self.d_h,
             "input_activation": self.input_activation,
@@ -60,7 +60,8 @@ class GateLoopEncoderDecoder(nn.Module):
             output_vocab_size=-1,  # Encoder specific parameter
             max_seq_length=self.max_seq_length_encoder,
             use_word_embedding=self.use_word_embedding_encoder,
-            use_head=False,  # Encoder specific parameter
+            use_head=False,  # Encoder specific parameter,
+            embedding_dropout=self.embedding_dropout_encoder,
             **shared_kwargs
         )
 
@@ -74,6 +75,7 @@ class GateLoopEncoderDecoder(nn.Module):
             use_word_embedding=self.use_word_embedding_decoder,
             use_head=self.use_head,
             cross_attention_dropout=self.cross_attention_dropout,
+            embedding_dropout=self.embedding_dropout_decoder,
             **shared_kwargs
         )
 
@@ -82,6 +84,7 @@ class GateLoopEncoderDecoder(nn.Module):
             if encoder_input is None:
                 raise AttributeError("Either encoder_input or precomputed encoding required!")
             _, encoding = self.encoder(encoder_input, training)
+
         h, x = self.decoder(decoder_input, encoding, training, carry=decoder_carry)
         return encoding, h, x
 

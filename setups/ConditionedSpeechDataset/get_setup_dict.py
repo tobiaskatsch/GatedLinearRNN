@@ -76,8 +76,8 @@ def get_model_setup_dict(model_class_name, model_variation_name):
 
     general_model_hparams = dict(
         n_head=4,
-        n_layer_encoder=8,
-        n_layer_decoder=2,
+        n_layer_encoder=6,
+        n_layer_decoder=6,
         d_model=384,
         d_channel_mixing=384 * 4,
         eps=1e-5,
@@ -89,7 +89,8 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         output_vocab_size=input_vocab_size_decoder,
         max_seq_length_encoder=max_seq_length_encoder,
         max_seq_length_decoder=max_seq_length_decoder,
-        embedding_dropout=0.1,
+        embedding_dropout_encoder=0.,
+        embedding_dropout_decoder=0.9,
         use_word_embedding_encoder=True,
         use_word_embedding_decoder=True,
         use_head=True,
