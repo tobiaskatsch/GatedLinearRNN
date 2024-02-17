@@ -121,7 +121,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         {'params': params}, stacked_tokens[:, :, :-1], False, carry=None # Feed initial sequence
     )
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
-    for _ in tqdm(range(max_speech_tokens-1)):
+    for _ in tqdm(range(max_speech_tokens-1-initial_length)):
         key, subkey = random.split(key)
         speech_token = speech_tokens[:, -1:]
         text_token = text_tokens[:, -1:]
