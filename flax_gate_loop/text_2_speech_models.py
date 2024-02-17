@@ -37,24 +37,24 @@ class Text2SpeechModel(nn.Module):
         else:
             raise NotImplementedError
 
-        self.text_embedding_dropout_function = nn.Dropout(rate=self.text_embedding_dropout)
+        #self.text_embedding_dropout_function = nn.Dropout(rate=self.text_embedding_dropout)
         self.speech_embedding_dropout_function = nn.Dropout(rate=self.speech_embedding_dropout)
 
-        self.text_embedding = nn.Embed(self.text_vocab_size, self.text_embedding_size)
+        #self.text_embedding = nn.Embed(self.text_vocab_size, self.text_embedding_size)
         self.speech_embedding = nn.Embed(self.speech_vocab_size, self.speech_embedding_size)
         self.input_proj = nn.Dense(self.d_model)
 
-        self.text_head = nn.Dense(self.text_vocab_size)
+        #self.text_head = nn.Dense(self.text_vocab_size)
         self.speech_head = nn.Dense(self.speech_vocab_size)
 
     def __call__(self, x, training: bool, carry=None):
         b, _, seq_length = x.shape  # (b, 2, seq_length)
-        x_text = self.text_embedding(x[:, 0, :])
-        x_text = self.text_embedding_dropout_function(x_text, deterministic=not training)
+        #x_text = self.text_embedding(x[:, 0, :])
+        #x_text = self.text_embedding_dropout_function(x_text, deterministic=not training)
         x_speech = self.speech_embedding(x[:, 1, :])
         x_speech = self.speech_embedding_dropout_function(x_speech, deterministic=not training)
-        x = jnp.concatenate((x_text, x_speech), axis=2)
-        x = self.input_proj(x)
+        #x = jnp.concatenate((x_text, x_speech), axis=2)
+        x = self.input_proj(x_speech)
 
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':
             x = x + self.wpe(seq_length)
@@ -65,9 +65,9 @@ class Text2SpeechModel(nn.Module):
             h.append(h_l)
         h = jnp.stack(h, axis=1)
 
-        text_logits = self.text_head(x)
+        #text_logits = self.text_head(x)
         speech_logits = self.speech_head(x)
-        return h, text_logits, speech_logits
+        return h, speech_logits  # h, text_logits, speech_logits
 
 
 

@@ -22,10 +22,10 @@ class Text2SpeechModelTrainer(BaseTrainer):
         def cross_entropy_batch_loss(params, step_rng, batch, training: bool):
             speech_targets, speech_tokens, text_targets, text_tokens = batch
             stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
-            _, text_logits, speech_logits = self.model.apply(
+            _, speech_logits = self.model.apply(
                 {'params': params}, stacked_tokens, training, rngs={'dropout': step_rng},
             )
-            text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets)
+            text_loss = 0. # reshape_and_cross_entropy_loss(text_logits, text_targets)
             speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             loss = text_loss * self.text_loss_scalar + speech_loss
             return loss
@@ -38,14 +38,14 @@ class Text2SpeechModelTrainer(BaseTrainer):
         def cross_entropy_batch_loss_and_acc(params, batch):
             speech_targets, speech_tokens, text_targets, text_tokens = batch
             stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
-            _, text_logits, speech_logits = self.model.apply(
+            _, speech_logits = self.model.apply(
                 {'params': params}, stacked_tokens, False,
             )
-            text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets)
+            text_loss = 0. # reshape_and_cross_entropy_loss(text_logits, text_targets)
             speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             loss = text_loss * self.text_loss_scalar + speech_loss
 
-            text_acc = accuracy(text_logits, text_targets)
+            text_acc = 0. # accuracy(text_logits, text_targets)
             speech_acc = accuracy(speech_logits, speech_targets)
 
             return loss, text_loss, speech_loss, text_acc, speech_acc
