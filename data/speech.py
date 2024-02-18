@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 import os
 import numpy as np
 from tqdm import tqdm
-from utils.speech_util import tokenize_transcript, normalize_waveform, tokenize_waveform
+from utils.speech_util import tokenize_transcript, normalize_waveform, tokenize_waveform, pad
 
 
 class UnconditionedSpeechDataset(Dataset):
@@ -259,35 +259,18 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
             speech_tokens.append(x)
         np.save(speech_tokens_path, speech_tokens)
 
-    data_shape = np.load(speech_tokens_path, allow_pickle=True).shape
-    seq_length = data_shape[1]
-
     text_tokens_path = os.path.join(data_folder_path, "text_tokens.npy")
-    text_targets_path = os.path.join(data_folder_path, "text_targets.npy")
-
-    text_tokens = np.full(data_shape, 71, dtype=int)
-    text_targets = np.full(data_shape, 71, dtype=int)
-
-    def sec_to_idx(time_s, snippet_length, seq_length):
-        return int(min(((seq_length / snippet_length) * time_s), seq_length))
-
-    if (not os.path.exists(text_tokens_path) or not os.path.exists(text_targets_path)) and conditioned is True:
+    text_tokens = []
+    if (not os.path.exists(text_tokens_path)) and conditioned is True:
         print(f"Tokenize transcript (71 tokens)")
         for data_idx, dir in enumerate(tqdm(get_subdirs(snippets_path))):
             with open(os.path.join(dir, "transcript.json")) as json_file:
                 segment_transcript = json.load(json_file)
-            for word_idx, this_dict in enumerate(segment_transcript):
-                word_start_idx = sec_to_idx(this_dict["start"], snippet_length, seq_length)
-                word_end_idx = sec_to_idx(this_dict["end"], snippet_length, seq_length)
-                tokens = tokenize_transcript(cmu_dict, this_dict["word"])
-                indices = np.linspace(word_start_idx, word_end_idx, len(tokens)+1, dtype=int)
-                for token_idx, token in enumerate(tokens):
-                    text_tokens[data_idx, word_idx + token_idx] = token
-                    text_targets[data_idx, (word_start_idx + indices[token_idx]):(word_start_idx + indices[token_idx+1])] = token
-
+            txt = transcript_to_txt(segment_transcript)
+            text_token = tokenize_transcript(cmu_dict, txt)
+            text_token = pad(text_token, max_phonetics, 71)
+            text_tokens.append(text_token)
         np.save(text_tokens_path, text_tokens)
-        np.save(text_targets_path, text_targets)
-
 
 
 
