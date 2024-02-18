@@ -183,7 +183,7 @@ class GateLoopText2SpeechModel(nn.Module):
         if encoding is None:
             if text_tokens is None:
                 raise AttributeError("Either text_tokens or encoding must be supplied!")
-            encoding = self.encoder(text_tokens)
+            encoding = self.encoder(text_tokens, training)
         h, x = self.decoder(speech_tokens, encoding, training, carry=carry)
         return h, x
 
