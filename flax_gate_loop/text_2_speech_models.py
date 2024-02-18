@@ -69,6 +69,7 @@ class GateLoopText2SpeechModel(nn.Module):
             max_seq_length=self.decoder_max_seq_length,
             embedding_dropout=self.decoder_embedding_dropout,
             cross_attention_layers_ids=self.cross_attention_layers_ids,
+            cross_attention_dropout=self.cross_attention_dropout,
             n_head=self.n_head,
             use_head=True,
             **general_model_params
@@ -83,26 +84,6 @@ class GateLoopText2SpeechModel(nn.Module):
         return encoding, h, x
 
 
-
-class MultiHeadCrossAttentionBlock(nn.Module):
-    d_model: int
-    d_h: int
-    n_head: int
-    dropout: float
-    eps: float
-    def setup(self):
-        self.cross_attention = MultiHeadCrossAttention(
-            d_model=self.d_model,
-            d_h=self.d_h,
-            n_head=self.n_head
-        )
-        self.layer_norm = nn.LayerNorm(epsilon=self.eps)
-        self.dropout_fn = nn.Dropout(rate=self.dropout)
-    def __call__(self, x, encoding, training, encoding_mask=None):
-        x = self.layer_norm(x)
-        x = self.cross_attention(x, encoding, encoding_mask=encoding_mask)
-        x = self.dropout_fn(x)
-        return x
 
 class CrossAttentionDecoder(nn.Module):
     n_layer: int
@@ -175,6 +156,27 @@ class CrossAttentionDecoder(nn.Module):
         if self.use_head is True:
             x = self.head(x)
         return h, x
+
+
+class MultiHeadCrossAttentionBlock(nn.Module):
+    d_model: int
+    d_h: int
+    n_head: int
+    dropout: float
+    eps: float
+    def setup(self):
+        self.cross_attention = MultiHeadCrossAttention(
+            d_model=self.d_model,
+            d_h=self.d_h,
+            n_head=self.n_head
+        )
+        self.layer_norm = nn.LayerNorm(epsilon=self.eps)
+        self.dropout_fn = nn.Dropout(rate=self.dropout)
+    def __call__(self, x, encoding, training, encoding_mask=None):
+        x = self.layer_norm(x)
+        x = self.cross_attention(x, encoding, encoding_mask=encoding_mask)
+        x = self.dropout_fn(x)
+        return x
 
 class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
     n_layer: int
