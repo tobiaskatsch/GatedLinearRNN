@@ -76,7 +76,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         eps=1e-5,
         channel_mixing_dropout=0.1,
         time_mixing_dropout=0.1,
-        encoder_vocab_size=71,
+        encoder_vocab_size=72,
         decoder_vocab_size=1024,
         encoder_max_seq_length=100,
         decoder_max_seq_length=2000,
