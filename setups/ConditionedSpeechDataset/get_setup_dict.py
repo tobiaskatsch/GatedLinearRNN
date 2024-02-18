@@ -34,11 +34,11 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     num_epochs = 50
 
 
-    speech_targets, speech_tokens, text_targets, text_tokens = next(iter(train_loader))
-    stacked_tokens = np.stack((text_tokens, speech_tokens), axis=1)
+    speech_targets, speech_tokens, text_tokens = next(iter(train_loader))
 
     model_trainer_hparams = dict(
-        exmp_input_args=(stacked_tokens,),
+        exmp_input_args=(speech_tokens,),
+        exmp_input_kwargs=dict(text_tokens=text_tokens),
         val_every_n_steps=50,
         log_every_n_steps=50,
         num_epochs=num_epochs,
@@ -75,13 +75,13 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         eps=1e-5,
         channel_mixing_dropout=0.1,
         time_mixing_dropout=0.1,
-        speech_embedding_size=384,
-        text_embedding_size=384,
-        speech_vocab_size=1024,
-        text_vocab_size=72,
-        max_seq_length=2000,
-        text_embedding_dropout=0.,
-        speech_embedding_dropout=0.99,
+        encoder_vocab_size=71,
+        decoder_vocab_size=1024,
+        encoder_max_seq_length=100,
+        decoder_max_seq_length=2000,
+        encoder_embedding_dropout=0.1,
+        decoder_embedding_dropout=0.1,
+        n_head=6,
     )
 
     module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"

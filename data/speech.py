@@ -23,9 +23,7 @@ class ConditionedSpeechDataset(Dataset):
         self.speech_tokens_sequences = np.load(speech_tokens_path, allow_pickle=True)
 
         text_tokens_path = os.path.join(data_folder_path, 'text_tokens.npy')
-        text_targets_path = os.path.join(data_folder_path, 'text_targets.npy')
         self.text_tokens_sequences = np.load(text_tokens_path, allow_pickle=True)
-        self.text_targets_sequences = np.load(text_targets_path, allow_pickle=True)
 
     def __len__(self):
             return len(self.text_tokens_sequences)
@@ -33,11 +31,8 @@ class ConditionedSpeechDataset(Dataset):
     def __getitem__(self, index):
         speech_targets = self.speech_tokens_sequences[index][1:]
         speech_tokens = self.speech_tokens_sequences[index][:-1]
-
-        text_targets = self.text_targets_sequences[index][:-1]
-        text_tokens = self.text_tokens_sequences[index][:-1]
-
-        return speech_targets, speech_tokens, text_targets, text_tokens
+        text_tokens = self.text_tokens_sequences[index]
+        return speech_targets, speech_tokens, text_tokens
 
 def get_subdirs(directory):
     return [os.path.join(directory, name) for name in os.listdir(directory)]

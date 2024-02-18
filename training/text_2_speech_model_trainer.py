@@ -6,9 +6,7 @@ import optax
 class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
-        self.top_k_acc = 1
-        self.text_loss_scalar = 0.
-        self.speech_loss_scalar = 1.
+        self.top_k = 5
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
@@ -22,14 +20,11 @@ class Text2SpeechModelTrainer(BaseTrainer):
             return cross_entropy_loss(logits, targets)
 
         def cross_entropy_batch_loss(params, step_rng, batch, training: bool):
-            speech_targets, speech_tokens, text_targets, text_tokens = batch
-            stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
-            _, text_logits, speech_logits = self.model.apply(
-                {'params': params}, stacked_tokens, training, rngs={'dropout': step_rng},
+            speech_targets, speech_tokens, text_tokens = batch
+            _, speech_logits = self.model.apply(
+                {'params': params}, speech_tokens, training, text_tokens=text_tokens, rngs={'dropout': step_rng},
             )
-            text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets) * self.text_loss_scalar
-            speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets) * self.speech_loss_scalar
-            loss = text_loss + speech_loss
+            loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             return loss
 
         def accuracy(logits, targets, top_k=1):
@@ -41,31 +36,25 @@ class Text2SpeechModelTrainer(BaseTrainer):
             return accuracy
 
         def cross_entropy_batch_loss_and_acc(params, batch):
-            speech_targets, speech_tokens, text_targets, text_tokens = batch
-            stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
-            _, text_logits, speech_logits = self.model.apply(
-                {'params': params}, stacked_tokens, False,
+            speech_targets, speech_tokens, text_tokens = batch
+            _, speech_logits = self.model.apply(
+                {'params': params}, speech_tokens, False, text_tokens=text_tokens,
             )
-            text_loss = reshape_and_cross_entropy_loss(text_logits, text_targets) * self.text_loss_scalar
-            speech_loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets) * self.speech_loss_scalar
-            loss = text_loss + speech_loss
-            text_top_k_acc = accuracy(text_logits, text_targets, top_k=self.top_k_acc)
-            speech_acc = accuracy(speech_logits, speech_targets)
-
-            return loss, text_loss, speech_loss, text_top_k_acc, speech_acc
+            loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
+            acc = accuracy(speech_logits, speech_targets, self.top_k)
+            return loss, acc
 
         def train_step(state, batch):
             step_rng = jax.random.fold_in(key=state.rng, data=state.step)
             loss_fn = lambda params: cross_entropy_batch_loss(params, step_rng, batch, training=True)
             loss, grads = jax.value_and_grad(loss_fn)(state.params)
-            # Update state
             state = state.apply_gradients(grads=grads)
             metrics = {'loss': loss}
             return state, metrics
 
         def eval_step(state, batch):
-            loss, text_loss, speech_loss, text_top_k_acc, speech_acc = cross_entropy_batch_loss_and_acc(state.params, batch)
-            metrics = {'loss': loss, 'text_loss': text_loss, 'speech_loss': speech_loss, f'text_top_{self.top_k_acc}_acc': text_top_k_acc, 'speech_acc': speech_acc}
+            loss, acc = cross_entropy_batch_loss_and_acc(state.params, batch)
+            metrics = {'loss': loss, f'acc@{self.top_k}': acc}
             return metrics
 
         return train_step, eval_step

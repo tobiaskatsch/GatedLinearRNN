@@ -27,7 +27,6 @@ def detokenize_text(t):
         if value == t:
             return key
 
-
 def tokenize_transcript(cmu_dict, text):
     # Remove special characters, keeping only letters and whitespaces
     clean_text = re.sub(r'[^a-zA-Z\s]', '', text)
