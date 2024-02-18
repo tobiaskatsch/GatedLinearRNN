@@ -51,7 +51,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
 
     optimizer_hparams = dict(
-        lr=0.00003,
+        lr=0.001,
         warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
         weight_decay=0.05,
         b1=0.9,
