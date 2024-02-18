@@ -26,6 +26,7 @@ class CrossAttentionDecoder(nn.Module):
     use_head: bool
     n_head: int
     d_h: int
+    cross_attention_layers_ids: list
 
     def setup(self):
         self.channel_mixing_layers = [ChannelMixing(
@@ -37,7 +38,7 @@ class CrossAttentionDecoder(nn.Module):
             d_model=self.d_model,
             d_h=self.d_h,
             n_head=self.n_head
-        ) for _ in range(self.n_layer)]
+        ) for _ in self.cross_attention_layers_ids]
         if self.positional_encoding_mode == 'learned':
             self.wpe = nn.Embed(self.max_seq_length, self.d_model)
         elif self.positional_encoding_mode == 'sinusoidal':
@@ -63,9 +64,12 @@ class CrossAttentionDecoder(nn.Module):
             x = x + self.wpe(seq_length)
         x = self.embedding_dropout_function(x, deterministic=not training)
         h = []
-        for l, (cross_attention, time_mixing, channel_mixing) in enumerate(zip(self.cross_attention_layers, self.time_mixing_layers, self.channel_mixing_layers)):
+        k = 0
+        for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None))
-            x = cross_attention(x, encoding, encoding_mask=encoding_mask)
+            if l in self.cross_attention_layers_ids:
+                x = self.cross_attention_layers[k](x, encoding, encoding_mask=encoding_mask)
+                k += 1
             x = channel_mixing(x, training)
             h.append(h_l)
         h = jnp.stack(h, axis=1)
@@ -89,6 +93,7 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
     use_head: bool
     n_head: int
     d_h: int
+    cross_attention_layers_ids: list
 
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
@@ -133,7 +138,7 @@ class GateLoopText2SpeechModel(nn.Module):
     encoder_embedding_dropout: float
     decoder_embedding_dropout: float
     n_head: int
-
+    cross_attention_layers_ids: list
     d_h: int
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
@@ -174,6 +179,7 @@ class GateLoopText2SpeechModel(nn.Module):
             output_vocab_size=self.decoder_vocab_size,
             max_seq_length=self.decoder_max_seq_length,
             embedding_dropout=self.decoder_embedding_dropout,
+            cross_attention_layers_ids=self.cross_attention_layers_ids,
             n_head=self.n_head,
             use_head=True,
             **general_model_params
