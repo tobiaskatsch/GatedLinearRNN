@@ -81,7 +81,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         text_vocab_size=72,
         max_seq_length=2000,
         text_embedding_dropout=0.,
-        speech_embedding_dropout=0.7,
+        speech_embedding_dropout=0.99,
     )
 
     module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"
