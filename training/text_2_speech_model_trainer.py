@@ -21,7 +21,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
 
         def cross_entropy_batch_loss(params, step_rng, batch, training: bool):
             speech_targets, speech_tokens, text_tokens = batch
-            _, speech_logits = self.model.apply(
+            _, _, speech_logits = self.model.apply(
                 {'params': params}, speech_tokens, training, text_tokens=text_tokens, rngs={'dropout': step_rng},
             )
             loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
@@ -37,7 +37,7 @@ class Text2SpeechModelTrainer(BaseTrainer):
 
         def cross_entropy_batch_loss_and_acc(params, batch):
             speech_targets, speech_tokens, text_tokens = batch
-            _, speech_logits = self.model.apply(
+            _, _, speech_logits = self.model.apply(
                 {'params': params}, speech_tokens, False, text_tokens=text_tokens,
             )
             loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
