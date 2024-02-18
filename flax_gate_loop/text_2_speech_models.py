@@ -175,7 +175,7 @@ class MultiHeadCrossAttentionBlock(nn.Module):
     def __call__(self, x, encoding, training, encoding_mask=None):
         x = self.layer_norm(x)
         x = self.cross_attention(x, encoding, encoding_mask=encoding_mask)
-        x = self.dropout_fn(x)
+        x = self.dropout_fn(x, deterministic=not training)
         return x
 
 class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
