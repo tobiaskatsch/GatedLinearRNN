@@ -6,7 +6,7 @@ import optax
 class Text2SpeechModelTrainer(BaseTrainer):
 
     def __init__(self, *args, **kwargs):
-        self.top_k = 5
+        self.top_k = 1
         super().__init__(*args, **kwargs)
 
     def create_functions(self):
