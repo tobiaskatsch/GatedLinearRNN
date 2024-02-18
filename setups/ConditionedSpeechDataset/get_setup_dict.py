@@ -34,11 +34,11 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
     num_epochs = 50
 
 
-    speech_targets, speech_tokens, text_tokens = next(iter(train_loader))
+    speech_targets, speech_tokens, text_tokens, text_masks = next(iter(train_loader))
 
     model_trainer_hparams = dict(
         exmp_input_args=(speech_tokens,),
-        exmp_input_kwargs=dict(text_tokens=text_tokens),
+        exmp_input_kwargs=dict(text_tokens=text_tokens, text_masks=text_masks),
         val_every_n_steps=50,
         log_every_n_steps=50,
         num_epochs=num_epochs,

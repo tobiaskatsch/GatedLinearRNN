@@ -56,7 +56,7 @@ class CrossAttentionDecoder(nn.Module):
         else:
             self.input_function = nn.Dense(self.d_model)
 
-    def __call__(self, x, encoding, training: bool, carry=None):
+    def __call__(self, x, encoding, training: bool, carry=None, encoding_mask=None):
         seq_length = x.shape[1]
         x = self.input_function(x)
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':
@@ -65,7 +65,7 @@ class CrossAttentionDecoder(nn.Module):
         h = []
         for l, (cross_attention, time_mixing, channel_mixing) in enumerate(zip(self.cross_attention_layers, self.time_mixing_layers, self.channel_mixing_layers)):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None))
-            x = cross_attention(x, encoding)
+            x = cross_attention(x, encoding, encoding_mask=encoding_mask)
             x = channel_mixing(x, training)
             h.append(h_l)
         h = jnp.stack(h, axis=1)
@@ -179,12 +179,12 @@ class GateLoopText2SpeechModel(nn.Module):
             **general_model_params
         )
 
-    def __call__(self, speech_tokens, training, text_tokens=None, encoding=None, carry=None):
+    def __call__(self, speech_tokens, training, text_tokens=None, text_masks=None, encoding=None, carry=None):
         if encoding is None:
             if text_tokens is None:
                 raise AttributeError("Either text_tokens or encoding must be supplied!")
             _, encoding = self.encoder(text_tokens, training)
-        h, x = self.decoder(speech_tokens, encoding, training, carry=carry)
+        h, x = self.decoder(speech_tokens, encoding, training, carry=carry, encoding_mask=text_masks)
         return encoding, h, x
 
 

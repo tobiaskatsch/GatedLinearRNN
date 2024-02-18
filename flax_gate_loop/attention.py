@@ -66,7 +66,7 @@ class MultiHeadCrossAttention(nn.Module):
         self.kv_proj = nn.Dense(2 * self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.out_proj = nn.Dense(self.d_model)
 
-    def __call__(self, query, key_value):
+    def __call__(self, query, key_value, encoding_mask=None):
         batch_size, seq_len_query, _ = query.shape
         _, seq_len_kv, _ = key_value.shape
 
@@ -78,8 +78,11 @@ class MultiHeadCrossAttention(nn.Module):
         # Project keys and values
         kv = self.kv_proj(key_value)
         kv = kv.reshape(batch_size, seq_len_kv, self.n_head, -1)
-        kv = kv.transpose(0, 2, 1, 3)  # [Batch, Head, SeqLenKV, Dims]
-        k, v = jnp.split(kv, 2, axis=-1)
+        kv = kv.transpose(0, 2, 1, 3)  # [Batch, Head, SeqLenKV, d_h*2]
+        k, v = jnp.split(kv, 2, axis=-1)  # [Batch, Head, SeqLenKV, d_h]
+
+        if encoding_mask is not None:
+            v = v * encoding_mask[:, None, :, None]
 
         output = scaled_dot_product(q, k, v, mask=None)
         output = output.transpose(0, 2, 1, 3)  # Back to [Batch, SeqLenQuery, Head, Dims]

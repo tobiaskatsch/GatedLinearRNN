@@ -20,9 +20,9 @@ class Text2SpeechModelTrainer(BaseTrainer):
             return cross_entropy_loss(logits, targets)
 
         def cross_entropy_batch_loss(params, step_rng, batch, training: bool):
-            speech_targets, speech_tokens, text_tokens = batch
+            speech_targets, speech_tokens, text_tokens, text_masks = batch
             _, _, speech_logits = self.model.apply(
-                {'params': params}, speech_tokens, training, text_tokens=text_tokens, rngs={'dropout': step_rng},
+                {'params': params}, speech_tokens, training, text_tokens=text_tokens, text_masks=text_masks, rngs={'dropout': step_rng},
             )
             loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             return loss
@@ -36,9 +36,9 @@ class Text2SpeechModelTrainer(BaseTrainer):
             return accuracy
 
         def cross_entropy_batch_loss_and_acc(params, batch):
-            speech_targets, speech_tokens, text_tokens = batch
+            speech_targets, speech_tokens, text_tokens, text_masks = batch
             _, _, speech_logits = self.model.apply(
-                {'params': params}, speech_tokens, False, text_tokens=text_tokens,
+                {'params': params}, speech_tokens, False, text_tokens=text_tokens, text_masks=text_masks,
             )
             loss = reshape_and_cross_entropy_loss(speech_logits, speech_targets)
             acc = accuracy(speech_logits, speech_targets, self.top_k)
