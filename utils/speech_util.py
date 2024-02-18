@@ -123,6 +123,9 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     text_tokens = jnp.array(pad(tokenize_transcript(cmu_dict, text), max_phonetics, 71))
     text_tokens = np.tile(text_tokens, (batch_size, 1))
 
+    text_masks = np.ones_like(text_tokens, dtype=bool)
+    text_masks[text_tokens == 71] = False
+
     key = random.PRNGKey(rng)
     speech_tokens = np.array([[initial_token]] * batch_size)
 
@@ -131,7 +134,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
         key, subkey = random.split(key)
         speech_token = speech_tokens[:, -1:]
         encoding, carry, logits = model.apply(
-            {'params': params}, speech_token, False, text_tokens=text_tokens, encoding=encoding, carry=carry
+            {'params': params}, speech_token, False, text_tokens=text_tokens, text_masks=text_masks, encoding=encoding, carry=carry
         )
         next_speech_token = random.categorical(subkey, logits[:, -1, :], shape=(batch_size,))
         speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
