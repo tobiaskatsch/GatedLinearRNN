@@ -65,7 +65,7 @@ class CrossAttentionDecoder(nn.Module):
         h = []
         for l, (cross_attention, time_mixing, channel_mixing) in enumerate(zip(self.cross_attention_layers, self.time_mixing_layers, self.channel_mixing_layers)):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None))
-            x = cross_attention(x, encoding)
+            #x = cross_attention(x, encoding)
             x = channel_mixing(x, training)
             h.append(h_l)
         h = jnp.stack(h, axis=1)

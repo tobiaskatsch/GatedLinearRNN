@@ -120,15 +120,7 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    #text_tokens = jnp.array(pad(tokenize_transcript(cmu_dict, text), max_phonetics, 71))
-
-    text_tokens = jnp.array([54, 47, 33, 38, 20, 53, 1, 52, 56, 21, 6, 44, 47, 68, 7, 65, 21,
-           6, 23, 31, 6, 44, 20, 54, 56, 1, 53, 56, 6, 20, 20, 13, 44, 71,
-           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
-           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
-           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
-           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71])
-
+    text_tokens = jnp.array(pad(tokenize_transcript(cmu_dict, text), max_phonetics, 71))
     text_tokens = np.tile(text_tokens, (batch_size, 1))
 
     key = random.PRNGKey(rng)
