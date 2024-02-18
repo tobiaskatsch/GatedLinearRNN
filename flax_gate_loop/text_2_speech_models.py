@@ -118,7 +118,7 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
         self.time_mixing_layers = time_mixing_layers
 
 
-class GateLoopText2Seq(nn.Module):
+class GateLoopText2SpeechModel(nn.Module):
     n_layer: int
     d_model: int
     d_channel_mixing: int
