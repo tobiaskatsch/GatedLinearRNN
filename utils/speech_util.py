@@ -113,18 +113,26 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
 
 
 
-def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4, max_phonetics=100):
+def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4, max_phonetics=100, initial_token=623):
     # 623
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    text_tokens = jnp.array(pad(tokenize_transcript(cmu_dict, text), max_phonetics, 71))
+    #text_tokens = jnp.array(pad(tokenize_transcript(cmu_dict, text), max_phonetics, 71))
+
+    text_tokens = jnp.array([54, 47, 33, 38, 20, 53, 1, 52, 56, 21, 6, 44, 47, 68, 7, 65, 21,
+           6, 23, 31, 6, 44, 20, 54, 56, 1, 53, 56, 6, 20, 20, 13, 44, 71,
+           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
+           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
+           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71,
+           71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71, 71])
+
     text_tokens = np.tile(text_tokens, (batch_size, 1))
 
     key = random.PRNGKey(rng)
-    speech_tokens = np.array([[623]] * batch_size)
+    speech_tokens = np.array([[initial_token]] * batch_size)
 
     carry, encoding = None, None
     for _ in tqdm(range(max_speech_tokens-1)):
