@@ -174,6 +174,7 @@ class GateLoopText2SpeechModel(nn.Module):
             output_vocab_size=self.decoder_vocab_size,
             max_seq_length=self.decoder_max_seq_length,
             embedding_dropout=self.decoder_embedding_dropout,
+            n_head=self.n_head,
             use_head=True,
             **general_model_params
         )
