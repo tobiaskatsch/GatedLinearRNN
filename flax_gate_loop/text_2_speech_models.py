@@ -54,7 +54,7 @@ class Text2SpeechModel(nn.Module):
         x_speech = self.speech_embedding(x[:, 1, :])
         x_speech = self.speech_embedding_dropout_function(x_speech, deterministic=not training)
         x = jnp.concatenate((x_text, x_speech), axis=2)
-        x = self.input_proj(x_text)
+        x = self.input_proj(x)
 
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':
             x = x + self.wpe(seq_length)
