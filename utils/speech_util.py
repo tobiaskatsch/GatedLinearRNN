@@ -126,9 +126,8 @@ def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokeni
     key = random.PRNGKey(rng)
     speech_tokens = np.array([[623]] * batch_size)
 
-    stacked_tokens = jnp.stack((text_tokens, speech_tokens), axis=1)
-    carry, text_logits, speech_logits = model.apply(
-        {'params': params}, stacked_tokens, False, carry=None # Feed initial sequence
+    carry, speech_logits = model.apply(
+        {'params': params}, speech_tokens, False, carry=None # Feed initial sequence
     )
     next_speech_token = random.categorical(random.PRNGKey(1), speech_logits[:, -1, :], shape=(batch_size,))
     speech_tokens = jnp.concatenate((speech_tokens, next_speech_token[:, None]), axis=1)
