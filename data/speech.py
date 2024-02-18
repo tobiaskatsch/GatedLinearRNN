@@ -266,7 +266,6 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
     text_tokens_path = os.path.join(data_folder_path, "text_tokens.npy")
     text_masks_path = os.path.join(data_folder_path, "text_masks.npy")
     text_tokens = []
-    text_masks = []
     if (not os.path.exists(text_tokens_path)) and conditioned is True:
         print(f"Tokenize transcript (71 tokens)")
         for data_idx, dir in enumerate(tqdm(get_subdirs(snippets_path))):
@@ -274,14 +273,12 @@ def preprocess_speech(data_folder_path, speech_tokenizer, device, playlist_url, 
                 segment_transcript = json.load(json_file)
             txt = transcript_to_txt(segment_transcript)
             text_token = tokenize_transcript(cmu_dict, txt)
-            text_mask = np.zeros(max_phonetics, dtype=bool)
-            text_mask[:min(len(text_token), max_phonetics)] = 1
             text_token = pad(text_token, max_phonetics, 71)
             text_tokens.append(text_token)
-            text_masks.append(text_mask)
         np.save(text_tokens_path, text_tokens)
-        np.save(text_masks_path, text_masks)
-
+        masks = np.ones_like(text_tokens, dtype=bool)
+        masks[text_tokens == 71] = False
+        np.save(text_masks_path, masks)
 
 
 
