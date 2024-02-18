@@ -119,7 +119,8 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
 
 
 class GateLoopText2SpeechModel(nn.Module):
-    n_layer: int
+    encoder_n_layer: int
+    decoder_n_layer: int
     d_model: int
     d_channel_mixing: int
     eps: float
@@ -168,7 +169,7 @@ class GateLoopText2SpeechModel(nn.Module):
         )
 
         self.decoder = GateLoopCrossAttentionDecoder(
-            n_layer=self.encoder_n_layer,
+            n_layer=self.decoder_n_layer,
             input_vocab_size=self.decoder_vocab_size,
             output_vocab_size=self.decoder_vocab_size,
             max_seq_length=self.decoder_max_seq_length,

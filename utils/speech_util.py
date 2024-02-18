@@ -112,13 +112,9 @@ def unconditioned_generation(model, params, out_dir, speech_tokenizer, device, a
 
 
 
-initial_speech_tokens = jnp.array(
-    [623, 501, 433, 832, 623, 501, 433, 832, 623, 501, 433, 832, 623, 501, 433, 832, 9, 501, 358, 60, 9, 501, 433, 60, 9, 501, 433, 60, 9, 501, 433, 938, 128, 501, 358, 938, 128, 501, 278, 187, 128, 501, 278, 187, 128, 501, 278, 187, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 278, 380, 128, 501, 717, 938, 128, 501, 717, 380, 128, 501, 87, 380, 128, 501, 988, 380, 128, 501, 988, 380, 128, 501, 988, 60, 128, 501, 988, 95, 128, 1005, 431, 15]
-)
-
 
 def conditioned_generation(text, cmu_dict, model, params, out_dir, speech_tokenizer, device, audio_length_seconds=5, rng=42, batch_size=10, num_quantizers=4):
-
+    # 623
     max_speech_tokens = round_up_to_nearest_four(int(200 * audio_length_seconds))  # such that quantization works
 
     if not os.path.exists(out_dir):
