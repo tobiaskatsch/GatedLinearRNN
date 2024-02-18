@@ -81,9 +81,10 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         encoder_max_seq_length=100,
         decoder_max_seq_length=2000,
         encoder_embedding_dropout=0.1,
-        decoder_embedding_dropout=0.1,
+        decoder_embedding_dropout=0.5,
         n_head=6,
         cross_attention_layers_ids=[3],
+        cross_attention_dropout=0.
     )
 
     module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"
