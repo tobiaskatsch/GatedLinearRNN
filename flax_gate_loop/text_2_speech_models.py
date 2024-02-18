@@ -58,7 +58,7 @@ class GateLoopText2SpeechModel(nn.Module):
             max_seq_length=self.encoder_max_seq_length,
             embedding_dropout=self.encoder_embedding_dropout,
             use_head=False,
-            bidirectional=True,
+            bidirectional=False,
             **general_model_params
         )
 
