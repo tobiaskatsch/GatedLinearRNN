@@ -8,6 +8,7 @@ from flax.linen import initializers
 class GateLoop(nn.Module):
     d_model: int
     d_h: int
+    reversed: bool = False
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
     gate_activation: Optional[Callable] = nn.sigmoid
@@ -51,6 +52,8 @@ class GateLoop(nn.Module):
                     y:      float   (batch_size, seq_len, d_h)
         """
         b, _, _ = x.shape
+        if self.reversed is True:
+            x = jnp.flip(x, axis=1)
         x = self.proj(x)
         if self.use_true_recurrence is True:
             if carry is None:
@@ -59,6 +62,8 @@ class GateLoop(nn.Module):
         else:
             h, y = self.model(x, carry=carry)
         y = self.out_proj(y)
+        if self.reversed is True:
+            y = jnp.flip(y, axis=1)
         return h, y
 
 def binary_operator(e_i, e_j):

@@ -58,6 +58,7 @@ class GateLoopText2SpeechModel(nn.Module):
             max_seq_length=self.encoder_max_seq_length,
             embedding_dropout=self.encoder_embedding_dropout,
             use_head=False,
+            bidirectional=True,
             **general_model_params
         )
 
@@ -216,6 +217,7 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
                         gate_activation=self.gate_activation,
                         use_true_recurrence=self.use_true_recurrence,
                         use_tied_gates=self.use_tied_gates,
+                        reversed=False,
                     )
                 )
             )
