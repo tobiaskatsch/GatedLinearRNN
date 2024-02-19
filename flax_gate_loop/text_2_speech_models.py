@@ -215,8 +215,6 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
 
 
 
-
-
 class PositionalEncodedMultiHeadCrossAttention(nn.Module):
     d_model: int
     d_h: int  # Dimensionality of the model / output size of each head
@@ -253,8 +251,6 @@ class PositionalEncodedMultiHeadCrossAttention(nn.Module):
         k = k.reshape(batch_size, seq_len_kv, self.n_head, -1).transpose(0, 2, 1, 3)
         v = v.reshape(batch_size, seq_len_kv, self.n_head, -1).transpose(0, 2, 1, 3)
 
-
-
         if encoding_mask is not None:
             v = v * encoding_mask[:, None, :, None]
 
@@ -263,7 +259,7 @@ class PositionalEncodedMultiHeadCrossAttention(nn.Module):
         output = output.reshape(batch_size, seq_len_query, -1)
 
         if encoding_mask is not None:
-            output = output / (jnp.sum(encoding_mask, axis=1)[:, None, None])
+            output = output / ((jnp.sum(encoding_mask, axis=1)[:, None, None]) + 0.000001)
 
         output = self.out_proj(output)
         return output
