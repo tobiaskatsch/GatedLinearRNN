@@ -174,7 +174,8 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
     time_mixing_dropout: float
     input_vocab_size: int
     output_vocab_size: int
-    max_seq_length: int
+    encoder_max_seq_length: int
+    decoder_max_seq_length: int
     embedding_dropout: float
     use_word_embedding: bool
     positional_encoding_mode: str
