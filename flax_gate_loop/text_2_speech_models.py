@@ -229,9 +229,9 @@ class PositionalEncodedMultiHeadCrossAttention(nn.Module):
         self.kv_proj = nn.Dense(2 * self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.k_proj = nn.Dense(self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.out_proj = nn.Dense(self.d_model)
-        d_head = self.d_h // self.n_head
-        self.q_positional_encoding = PositionalEncoding(d_model=d_head, max_seq_length=self.decoder_max_seq_length)
-        self.k_positional_encoding = PositionalEncoding(d_model=d_head, max_seq_length=self.encoder_max_seq_length)
+        self.d_head = self.d_h // self.n_head
+        self.q_positional_encoding = PositionalEncoding(d_model=self.d_model, max_seq_length=self.decoder_max_seq_length)
+        self.k_positional_encoding = PositionalEncoding(d_model=self.d_h, max_seq_length=self.encoder_max_seq_length)
 
     def __call__(self, query, key_value, training: bool, encoding_mask=None):
         batch_size, seq_len_query, _ = query.shape
@@ -246,12 +246,14 @@ class PositionalEncodedMultiHeadCrossAttention(nn.Module):
 
         # Project keys and values
         kv = self.kv_proj(key_value)
-        kv = kv.reshape(batch_size, seq_len_kv, self.n_head, -1)
-        kv = kv.transpose(0, 2, 1, 3)  # [Batch, Head, SeqLenKV, d_h*2]
-        k, v = jnp.split(kv, 2, axis=-1)  # [Batch, Head, SeqLenKV, d_h]
-
-        k = k + self.k_positional_encoding(seq_len_kv)[None, None, :, :]
+        k, v = jnp.split(kv, 2, axis=-1)  # b, l, d_h
+        k = k + self.k_positional_encoding(seq_len_kv)[None, :, :]
         k = self.k_proj(k)
+
+        k = k.reshape(batch_size, seq_len_kv, self.n_head, -1).transpose(0, 2, 1, 3)
+        v = v.reshape(batch_size, seq_len_kv, self.n_head, -1).transpose(0, 2, 1, 3)
+
+
 
         if encoding_mask is not None:
             v = v * encoding_mask[:, None, :, None]
