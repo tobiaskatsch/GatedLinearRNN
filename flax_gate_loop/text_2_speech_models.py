@@ -60,7 +60,6 @@ class GateLoopText2SpeechModel(nn.Module):
             embedding_dropout=self.encoder_embedding_dropout,
             use_word_embedding=False,
             use_head=False,
-            bidirectional=True,
             **general_model_params
         )
 
@@ -154,9 +153,9 @@ class CrossAttentionDecoder(nn.Module):
         k = 0
         for l, time_mixing in enumerate(self.time_mixing_layers):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None))
-            #if l in self.cross_attention_layers_ids:
-                #x = x + self.cross_attention_layers[k](x, encoding, training, encoding_mask=encoding_mask)
-                #k += 1
+            if l in self.cross_attention_layers_ids:
+                x = x + self.cross_attention_layers[k](x, encoding, training, encoding_mask=encoding_mask)
+                k += 1
             h.append(h_l)
         x = self.channel_mixing(x, training)
         h = jnp.stack(h, axis=1)

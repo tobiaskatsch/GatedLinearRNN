@@ -20,7 +20,6 @@ class GateLoopLM(SequenceModel):
     use_head: bool
 
     d_h: int
-    bidirectional: bool = False
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
     gate_activation: Optional[Callable] = nn.sigmoid
@@ -39,7 +38,7 @@ class GateLoopLM(SequenceModel):
                     model=GateLoop(
                         d_model=self.d_model,
                         d_h=self.d_h,
-                        reversed=(False if self.bidirectional is False else (False if is_even(layer) else True)),
+                        reversed=False,
                         input_activation=self.input_activation,
                         hidden_activation=self.hidden_activation,
                         gate_activation=self.gate_activation,
