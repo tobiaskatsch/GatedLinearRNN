@@ -69,10 +69,10 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 def get_model_setup_dict(model_class_name, model_variation_name):
 
     general_model_hparams = dict(
-        encoder_n_layer=6,
-        decoder_n_layer=3,
-        d_model=512,
-        d_channel_mixing=512 * 2,
+        encoder_n_layer=7,
+        decoder_n_layer=4,
+        d_model=256,
+        d_channel_mixing=256,
         eps=1e-5,
         channel_mixing_dropout=0.1,
         time_mixing_dropout=0.1,
@@ -82,8 +82,8 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         decoder_max_seq_length=2000,
         encoder_embedding_dropout=0.1,
         decoder_embedding_dropout=0.5,
-        n_head=6,
-        cross_attention_layers_ids=[1],
+        n_head=4,
+        cross_attention_layers_ids=[0, 1, 2, 3],
         cross_attention_dropout=0.
     )
 

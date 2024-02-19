@@ -31,7 +31,7 @@ class SequenceModel(nn.Module):
             pass
         else:
             raise NotImplementedError
-        if self.input_vocab_size is None and self.use_word_embedding:
+        if self.input_vocab_size is None and self.use_word_embedding is True:
             raise AttributeError("self.input_vocab_size is None and self.use_word_embedding")
         if self.use_head is True:
             self.head = nn.Dense(self.output_vocab_size)
