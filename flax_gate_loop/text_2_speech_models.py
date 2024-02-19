@@ -41,7 +41,6 @@ class GateLoopText2SpeechModel(nn.Module):
             eps=self.eps,
             channel_mixing_dropout=self.channel_mixing_dropout,
             time_mixing_dropout=self.time_mixing_dropout,
-            use_word_embedding=True,
             positional_encoding_mode="none",
             d_h=self.d_h,
             input_activation=self.input_activation,
@@ -74,6 +73,7 @@ class GateLoopText2SpeechModel(nn.Module):
             embedding_dropout=self.decoder_embedding_dropout,
             cross_attention_layers_ids=self.cross_attention_layers_ids,
             cross_attention_dropout=self.cross_attention_dropout,
+            use_word_embedding=True,
             n_head=self.n_head,
             use_head=True,
             **general_model_params
