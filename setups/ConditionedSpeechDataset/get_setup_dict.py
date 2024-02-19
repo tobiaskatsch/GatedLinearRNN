@@ -51,7 +51,7 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
 
     optimizer_hparams = dict(
-        lr=0.0002,
+        lr=0.001,
         warumup_steps=(0.1 * len(train_set) * num_epochs) / batch_size,
         weight_decay=0.05,
         b1=0.9,
@@ -81,7 +81,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         encoder_max_seq_length=100,
         decoder_max_seq_length=2000,
         encoder_embedding_dropout=0.1,
-        decoder_embedding_dropout=0.5,
+        decoder_embedding_dropout=0.1,
         n_head=4,
         cross_attention_layers_ids=[0, 1, 2, 3],
         cross_attention_dropout=0.
