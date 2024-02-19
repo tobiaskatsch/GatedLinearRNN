@@ -229,8 +229,9 @@ class PositionalEncodedMultiHeadCrossAttention(nn.Module):
         self.kv_proj = nn.Dense(2 * self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.k_proj = nn.Dense(self.d_h, kernel_init=nn.initializers.xavier_uniform(), bias_init=nn.initializers.zeros)
         self.out_proj = nn.Dense(self.d_model)
-        self.q_positional_encoding = PositionalEncoding(d_model=self.d_model, max_seq_length=self.decoder_max_seq_length)
-        self.k_positional_encoding = PositionalEncoding(d_model=self.d_model, max_seq_length=self.encoder_max_seq_length)
+        d_head = self.d_h // self.n_head
+        self.q_positional_encoding = PositionalEncoding(d_model=d_head, max_seq_length=self.decoder_max_seq_length)
+        self.k_positional_encoding = PositionalEncoding(d_model=d_head, max_seq_length=self.encoder_max_seq_length)
 
     def __call__(self, query, key_value, training: bool, encoding_mask=None):
         batch_size, seq_len_query, _ = query.shape
