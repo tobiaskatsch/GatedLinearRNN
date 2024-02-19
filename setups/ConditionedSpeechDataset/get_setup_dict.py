@@ -69,10 +69,10 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 def get_model_setup_dict(model_class_name, model_variation_name):
 
     general_model_hparams = dict(
-        encoder_n_layer=7,
-        decoder_n_layer=8,
+        encoder_n_layer=8,
+        decoder_n_layer=9,
         d_model=256,
-        d_channel_mixing=256*2,
+        d_channel_mixing=256*4,
         eps=1e-5,
         channel_mixing_dropout=0.05,
         time_mixing_dropout=0.05,
