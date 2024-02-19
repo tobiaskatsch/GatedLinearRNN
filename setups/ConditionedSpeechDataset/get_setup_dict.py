@@ -83,7 +83,7 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         encoder_embedding_dropout=0.,
         decoder_embedding_dropout=0.,
         n_head=4,
-        cross_attention_layers_ids=[0, 1, 2, 3],
+        cross_attention_layers_ids=list(range(9)),
         cross_attention_dropout=0.
     )
 
