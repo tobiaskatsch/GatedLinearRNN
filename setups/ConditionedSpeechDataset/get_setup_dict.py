@@ -69,8 +69,8 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 def get_model_setup_dict(model_class_name, model_variation_name):
 
     general_model_hparams = dict(
-        encoder_n_layer=12,
-        decoder_n_layer=12,
+        encoder_n_layer=8,
+        decoder_n_layer=2,
         d_model=512,
         d_channel_mixing=512 * 2,
         eps=1e-5,
@@ -83,8 +83,8 @@ def get_model_setup_dict(model_class_name, model_variation_name):
         encoder_embedding_dropout=0.1,
         decoder_embedding_dropout=0.1,
         n_head=6,
-        cross_attention_layers_ids=[1, 3, 6],
-        cross_attention_dropout=0.
+        cross_attention_layers_ids=[0],
+        cross_attention_dropout=1.
     )
 
     module_name = f"setups.ConditionedSpeechDataset.{model_class_name}"
