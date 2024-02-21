@@ -12,10 +12,10 @@
 ## About
 
 
-GateLoop is a novel sequence model which generalizes linear recurrent models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions.
-While having a low cost linear complexity inference mode, GateLoop can be trained extremely efficient in parallel with logarithmic complexity making use of the highly optimized JAX associative scan implementation.
-This repository implements a practical (real valued) GateLoop model with proper default choices for input-, hidden- and gate activations and provides a drop-in replacement for causal multi-head-attention and a GateLoop-based language model architecture. 
-Furthermore, GateLoop can be used to train true recurrent models (GRU, LSTM) extremely fast by first training using associative scans and switching to a true recurrent mode (by enabling recurrent weights) for finetuning.
+Linear Gated RNNs (GateLoop, Mamba) are a novel class of sequence model which generalizes linear recurrent models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions.
+While having a low cost linear complexity inference mode, they can be trained extremely efficient in parallel with logarithmic complexity making use of the highly optimized JAX associative scan implementation.
+This repository implements a practical (real valued, element-wise gating) model with proper default choices for input-, hidden- and gate activations and provides a drop-in replacement for causal multi-head-attention and a linear gated RNN language model architecture. 
+Furthermore, linear gated RNNs can be used to train true recurrent models (GRU, LSTM) extremely fast by first training using associative scans and switching to a true recurrent mode (by enabling recurrent weights) for finetuning.
 
 ## Installation
 
