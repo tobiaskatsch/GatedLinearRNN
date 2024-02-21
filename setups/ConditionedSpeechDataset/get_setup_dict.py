@@ -33,7 +33,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
 
     num_epochs = 50
 
-
     speech_targets, speech_tokens, text_tokens, text_masks = next(iter(train_loader))
 
     model_trainer_hparams = dict(
@@ -48,7 +47,6 @@ def get_setup_dict(model_class_name, model_variation_name, seed, num_workers, da
         seed=seed,
         debug=False,
     )
-
 
     optimizer_hparams = dict(
         lr=0.0005,
