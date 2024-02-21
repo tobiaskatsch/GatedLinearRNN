@@ -8,7 +8,7 @@ from jax import random
 import torchaudio
 import numpy as np
 import os
-from flax_gate_loop import GateLoopLM, GateLoopText2SpeechModel
+from gated_linear_rnn import GateLoopLM, GateLoopText2SpeechModel
 
 
 vocab = {

@@ -5,12 +5,12 @@ from . import GateLoopLM
 from .attention import MultiHeadCrossAttention, scaled_dot_product
 from .base_models.channel_mixing import ChannelMixing
 from .base_models.sequence_model import SinusoidalPositionalEncoding
-from .gate_loop import GateLoop
+from .gated_linear_rnn import GatedLinearRNN
 from .base_models import CausalTimeMixing
 from typing import Optional, Callable
 
 
-class GateLoopText2SpeechModel(nn.Module):
+class GatedLinearRNNText2SpeechModel(nn.Module):
     encoder_n_layer: int
     decoder_n_layer: int
     d_model: int
@@ -198,7 +198,7 @@ class GateLoopCrossAttentionDecoder(CrossAttentionDecoder):
                 CausalTimeMixing(
                     eps=self.eps,
                     dropout=self.time_mixing_dropout,
-                    model=GateLoop(
+                    model=GatedLinearRNN(
                         d_model=self.d_model,
                         d_h=self.d_h,
                         input_activation=self.input_activation,

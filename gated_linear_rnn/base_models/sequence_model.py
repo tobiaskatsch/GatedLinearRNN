@@ -1,6 +1,6 @@
 from flax import linen as nn
 import jax.numpy as jnp
-from flax_gate_loop.base_models.channel_mixing import ChannelMixing
+from gated_linear_rnn.base_models.channel_mixing import ChannelMixing
 
 class SequenceModel(nn.Module):
     n_layer: int

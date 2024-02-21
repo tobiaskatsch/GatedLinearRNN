@@ -1,0 +1,2 @@
+from .gated_linear_rnn import GatedLinearRNN
+from gated_linear_rnn.language_models import GatedLinearRNNLM

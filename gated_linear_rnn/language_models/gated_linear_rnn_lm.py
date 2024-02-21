@@ -1,10 +1,10 @@
-from flax_gate_loop.base_models.sequence_model import SequenceModel
-from flax_gate_loop.base_models.time_mixing import CausalTimeMixing
+from gated_linear_rnn.base_models.sequence_model import SequenceModel
+from gated_linear_rnn.base_models.time_mixing import CausalTimeMixing
 from typing import Optional, Callable
-from flax_gate_loop.gate_loop import GateLoop
+from gated_linear_rnn.gated_linear_rnn import GatedLinearRNN
 from flax import linen as nn
 
-class GateLoopLM(SequenceModel):
+class GatedLinearRNNLM(SequenceModel):
     n_layer: int
     d_model: int
     d_channel_mixing: int
@@ -35,7 +35,7 @@ class GateLoopLM(SequenceModel):
                 CausalTimeMixing(
                     eps=self.eps,
                     dropout=self.time_mixing_dropout,
-                    model=GateLoop(
+                    model=GatedLinearRNN(
                         d_model=self.d_model,
                         d_h=self.d_h,
                         reversed=False,

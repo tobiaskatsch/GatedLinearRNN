@@ -5,7 +5,7 @@ from typing import Optional, Callable
 from flax.linen import initializers
 
 
-class GateLoop(nn.Module):
+class GatedLinearRNN(nn.Module):
     d_model: int
     d_h: int
     reversed: bool = False
@@ -36,11 +36,11 @@ class GateLoop(nn.Module):
                 "split_rngs": {"params": False},  # Not splitting RNGs by default
             }
             model_class = nn.scan(
-                RecurrentScanGateLoop,
+                RecurrentScanGLRU,
                 **scan_args,
             )
         else:
-            model_class = AssociativeScanGateLoop
+            model_class = AssociativeScanGLRU
         self.model = model_class(**args)
 
 
@@ -71,7 +71,7 @@ def binary_operator(e_i, e_j):
     a_j, kv_j = e_j
     return a_j * a_i, a_j * kv_i + kv_j
 
-class AssociativeScanGateLoop(nn.Module):
+class AssociativeScanGLRU(nn.Module):
     d_h: int
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh
@@ -99,7 +99,7 @@ class AssociativeScanGateLoop(nn.Module):
         h = h[:, -1, :]
         return h, y
 
-class RecurrentScanGateLoop(nn.Module):
+class RecurrentScanGLRU(nn.Module):
     d_h: int
     input_activation: Optional[Callable] = nn.tanh
     hidden_activation: Optional[Callable] = nn.tanh

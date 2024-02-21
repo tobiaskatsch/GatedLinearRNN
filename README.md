@@ -1,25 +1,30 @@
-# GateLoop
+# GatedLinearRNN
 
 <div style="display: flex; justify-content: space-around; align-items: center;">
-    <img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
+    <img src="assets/gated_linear_rnn.png" alt="GatedLinearRNN" width="300px"/>
     <img src="assets/eq.png" alt="Equation" width="400px"/>
 </div>
 
-> **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
+> **GatedLinearRNN: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
 > Tobias Katsch*\
 > Paper: https://arxiv.org/abs/2311.01927
+>
 
 ## About
 
-
-GateLoop is a novel sequence model which generalizes linear recurrent models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions.
-While having a low cost linear complexity inference mode, GateLoop can be trained extremely efficient in parallel with logarithmic complexity making use of the highly optimized JAX associative scan implementation.
-This repository implements a practical (real valued) GateLoop model with proper default choices for input-, hidden- and gate activations and provides a drop-in replacement for causal multi-head-attention and a GateLoop-based language model architecture. 
-Furthermore, GateLoop can be used to train true recurrent models (GRU, LSTM) extremely fast by first training using associative scans and switching to a true recurrent mode (by enabling recurrent weights) for finetuning.
+Linear Gated RNNs (Mamba, GateLoop, HGRN) are a novel class of sequence model which generalizes linear recurrent 
+models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions. 
+While having a low cost linear complexity inference mode, they can be trained extremely 
+efficient in parallel with logarithmic complexity making use of the highly optimized JAX 
+associative scan implementation. This repository implements a practical gated linear recurrent model with default 
+choices for input-, hidden- and gate activations and provides a drop-in replacement for causal multi-head-attention 
+and a linear gated RNN language model architecture. Furthermore, linear gated RNNs can be used to train true recurrent 
+models (GRU, LSTM) extremely fast by first training using associative scans and switching to a true recurrent mode 
+(by enabling recurrent weights) for finetuning.
 
 ## Installation
 
-- `pip install flax-gate-loop`: The core GateLoop package.
+- `pip install flax-gated-linear-rnn`:
 
 Other requirements:
 - JAX 0.4.20+
@@ -27,20 +32,20 @@ Other requirements:
 
 ## Usage
 We provide 2 main modules:
-- ### [gate_loop.py](flax_gate_loop/gate_loop.py)
+- ### [gated_linear_rnn.py](gated_linear_rnn/gated_linear_rnn.py)
   A causal time mixing sequence model which can be used as a drop-in replacement for causal multi-head-attention.
   Usage:
   ```
   import jax
   import jax.numpy as jnp
   from flax import linen as nn
-  from flax_gate_loop import GateLoop
+  from flax_gated_linear_rnn import GatedLinearRNN
   
   batch_size, sequence_length, input_dim, d_h = 2, 64, 16, 32
   key = jax.random.PRNGKey(0)
   x = jax.random.normal(key, (batch_size, sequence_length, input_dim))
   
-  model = GateLoop(
+  model = GatedLinearRNN(
       d_h=d_h,
       input_activation=nn.tanh,
       hidden_activation=nn.tanh,
@@ -64,13 +69,13 @@ We provide 2 main modules:
   - **Tied Input & Forget gate** (`use_tied_gates=True`) Ties the input and forget gate through the relation `forget_gate = 1-input_gate`.
 
 
-- ## [gate_loop_lm.py](flax_gate_loop/language_models/gate_loop_lm.py)
-  A GateLoop-based language model.
+- ## [gated_linear_rnn_lm.py](gated_linear_rnn/language_models/gated_linear_rnn_lm.py)
+  A GatedLinearRNN-based language model.
   ```
   import jax
   import jax.numpy as jnp
   from flax import linen as nn
-  from flax_gate_loop import GateLoopLM
+  from flax_gated_linear_rnn import GatedLinearRNNLM
   
   # Model parameters
   n_layer = 4
@@ -87,7 +92,7 @@ We provide 2 main modules:
   positional_encoding_mode = 'none'  # 'none', 'learned', 'sinusoidal'
   d_h = 256
   
-  model = GateLoopLM(
+  model = GatedLinearRNNLM(
     n_layer=n_layer,
     d_model=d_model,
     d_channel_mixing=d_channel_mixing,
@@ -118,14 +123,14 @@ We provide 2 main modules:
   assert y.shape == (batch_size, max_seq_length, output_vocab_size)
   assert carry.shape == (batch_size, n_layers, d_h)
   ```
-  `carry` holds the hidden GateLoop model states for all layers which can be used for fast linear complexity autoregressive inference.
+  `carry` holds the hidden GatedLinearRNN model states for all layers which can be used for fast linear complexity autoregressive inference.
 
 ## Citation
 
 If you use this codebase, please cite:
 ```
-@misc{katsch2024gateloop,
-      title={GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling}, 
+@misc{katsch2024GatedLinearRNN,
+      title={GatedLinearRNN: Fully Data-Controlled Linear Recurrence for Sequence Modeling}, 
       author={Tobias Katsch},
       year={2024},
       eprint={2311.01927},
