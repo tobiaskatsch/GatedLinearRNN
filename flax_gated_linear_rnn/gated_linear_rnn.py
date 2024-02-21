@@ -48,7 +48,7 @@ class GatedLinearRNN(nn.Module):
         :param      x:      float   (batch_size, seq_len, d_model) required
                     carry:  float   (batch_size, d_h) (optional)
         :return:    h:      float   (batch_size, d_h)
-                    y:      float   (batch_size, seq_len, d_h)
+                    y:      float   (batch_size, seq_len, d_model)
         """
         b, _, _ = x.shape
         x = self.proj(x)
