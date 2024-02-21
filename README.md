@@ -1,4 +1,4 @@
-# Linear Gated RNNs
+# Linear Gated RNN
 
 <div style="display: flex; justify-content: space-around; align-items: center;">
     <img src="assets/gate_loop.png" alt="GateLoop" width="300px"/>
