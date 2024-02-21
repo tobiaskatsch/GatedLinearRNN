@@ -26,7 +26,6 @@ class GatedLinearRNNLM(SequenceModel):
     use_true_recurrence: Optional[bool] = False
     use_tied_gates: Optional[bool] = True
 
-
     def setup(self):
         super().setup()
         time_mixing_layers = []
@@ -38,7 +37,6 @@ class GatedLinearRNNLM(SequenceModel):
                     model=GatedLinearRNN(
                         d_model=self.d_model,
                         d_h=self.d_h,
-                        reversed=False,
                         input_activation=self.input_activation,
                         hidden_activation=self.hidden_activation,
                         gate_activation=self.gate_activation,

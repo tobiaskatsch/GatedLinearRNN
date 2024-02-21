@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='flax-gated-linear-rnn',
-    version='1.0.2',
+    version='1.0.3',
     author='Tobias Katsch',
     author_email='tobias.katsch42@gmail.com',
     packages=find_packages(),

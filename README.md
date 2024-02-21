@@ -41,11 +41,12 @@ We provide 2 main modules:
   from flax import linen as nn
   from flax_gated_linear_rnn import GatedLinearRNN
   
-  batch_size, sequence_length, input_dim, d_h = 2, 64, 16, 32
+  batch_size, sequence_length, input_dim, d_h, d_model = 2, 64, 16, 32, 18
   key = jax.random.PRNGKey(0)
   x = jax.random.normal(key, (batch_size, sequence_length, input_dim))
   
   model = GatedLinearRNN(
+      d_model=d_model,
       d_h=d_h,
       input_activation=nn.tanh,
       hidden_activation=nn.tanh,
@@ -56,7 +57,7 @@ We provide 2 main modules:
   
   params = model.init(jax.random.PRNGKey(1), x)
   carry, y = model.apply(params, x, carry=None)
-  assert y.shape == (batch_size, sequence_length, d_h)
+  assert y.shape == (batch_size, sequence_length, d_model)
   assert carry.shape == (batch_size, d_h)
   ```
   `carry` holds the hidden model state, which can be used for fast linear complexity autoregressive inference.
@@ -106,6 +107,7 @@ We provide 2 main modules:
     use_word_embedding=use_word_embedding,
     positional_encoding_mode=positional_encoding_mode,
     d_h=d_h,
+    use_head=True,
     input_activation=nn.tanh,
     hidden_activation=nn.tanh,
     gate_activation=nn.sigmoid,
@@ -121,7 +123,7 @@ We provide 2 main modules:
   params = model.init(jax.random.PRNGKey(2), x, training=False)
   carry, y = model.apply(params, x, training=True, carry=None, rngs={'dropout': jax.random.PRNGKey(0)})
   assert y.shape == (batch_size, max_seq_length, output_vocab_size)
-  assert carry.shape == (batch_size, n_layers, d_h)
+  assert carry.shape == (batch_size, n_layer, d_h)
   ```
   `carry` holds the hidden GatedLinearRNN model states for all layers which can be used for fast linear complexity autoregressive inference.
 
