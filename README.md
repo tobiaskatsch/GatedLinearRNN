@@ -5,7 +5,7 @@
     <img src="assets/eq.png" alt="Equation" width="400px"/>
 </div>
 
-> **GatedLinearRNN: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
+> **GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling**\
 > Tobias Katsch*\
 > Paper: https://arxiv.org/abs/2311.01927
 >
