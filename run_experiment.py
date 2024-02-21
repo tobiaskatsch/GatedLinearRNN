@@ -4,8 +4,8 @@ from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
-from gated_linear_rnn import GateLoopLM, GateLoopText2SpeechModel
-from gated_linear_rnn.language_models import TransformerLM
+from flax_gated_linear_rnn import GateLoopLM, GateLoopText2SpeechModel
+from flax_gated_linear_rnn.language_models import TransformerLM
 
 
 

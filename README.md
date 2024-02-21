@@ -32,7 +32,7 @@ Other requirements:
 
 ## Usage
 We provide 2 main modules:
-- ### [gated_linear_rnn.py](gated_linear_rnn/gated_linear_rnn.py)
+- ### [gated_linear_rnn.py](flax_gated_linear_rnn/gated_linear_rnn.py)
   A causal time mixing sequence model which can be used as a drop-in replacement for causal multi-head-attention.
   Usage:
   ```
@@ -69,7 +69,7 @@ We provide 2 main modules:
   - **Tied Input & Forget gate** (`use_tied_gates=True`) Ties the input and forget gate through the relation `forget_gate = 1-input_gate`.
 
 
-- ## [gated_linear_rnn_lm.py](gated_linear_rnn/language_models/gated_linear_rnn_lm.py)
+- ## [gated_linear_rnn_lm.py](flax_gated_linear_rnn/language_models/gated_linear_rnn_lm.py)
   A GatedLinearRNN-based language model.
   ```
   import jax

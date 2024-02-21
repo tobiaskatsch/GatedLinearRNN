@@ -1,7 +1,7 @@
-from gated_linear_rnn.base_models.sequence_model import SequenceModel
-from gated_linear_rnn.base_models.time_mixing import CausalTimeMixing
+from flax_gated_linear_rnn.base_models.sequence_model import SequenceModel
+from flax_gated_linear_rnn.base_models.time_mixing import CausalTimeMixing
 from typing import Optional, Callable
-from gated_linear_rnn.gated_linear_rnn import GatedLinearRNN
+from flax_gated_linear_rnn.gated_linear_rnn import GatedLinearRNN
 from flax import linen as nn
 
 class GatedLinearRNNLM(SequenceModel):

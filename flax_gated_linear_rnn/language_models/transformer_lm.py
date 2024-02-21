@@ -1,7 +1,7 @@
 from typing import Optional, Callable
-from gated_linear_rnn.base_models.sequence_model import SequenceModel
-from gated_linear_rnn.base_models.time_mixing import CausalTimeMixing
-from gated_linear_rnn.attention import MultiHeadSelfAttention
+from flax_gated_linear_rnn.base_models.sequence_model import SequenceModel
+from flax_gated_linear_rnn.base_models.time_mixing import CausalTimeMixing
+from flax_gated_linear_rnn.attention import MultiHeadSelfAttention
 
 
 class TransformerLM(SequenceModel):
