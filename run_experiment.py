@@ -4,6 +4,7 @@ from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
+from flax_gated_linear_rnn.language_models import TransformerLM, GatedLinearRNNLM
 
 
 

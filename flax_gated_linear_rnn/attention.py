@@ -42,7 +42,7 @@ class MultiHeadSelfAttention(nn.Module):
         q, k, v = jnp.split(qkv, 3, axis=-1)
 
         combined_mask = None
-        if self.use_causal_mask:
+        if self.use_causal_mask is True:
             causal_mask = jnp.tril(jnp.ones((seq_len, seq_len), dtype=jnp.float32)).reshape((1, 1, seq_len, seq_len))
             combined_mask = causal_mask
         if mask is not None:
