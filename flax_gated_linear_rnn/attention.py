@@ -37,7 +37,7 @@ class MultiHeadSelfAttention(nn.Module):
         batch_size, seq_len, d_model = x.shape
 
         qkv = self.qkv_proj(x)
-        qkv = qkv.reshape(batch_size, seq_len, self.n_head, 3 * d_model // self.n_head)
+        qkv = qkv.reshape(batch_size, seq_len, self.n_head, 3 * self.d_h // self.n_head)
         qkv = qkv.transpose(0, 2, 1, 3)  # [Batch, Head, SeqLen, Dims]
         q, k, v = jnp.split(qkv, 3, axis=-1)
 
