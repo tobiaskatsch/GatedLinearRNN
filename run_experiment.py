@@ -1,14 +1,13 @@
-import sys
 import os
-import jax
-from data.numpy_data_loader import NumpyDataLoader
-from flax_gate_loop.language_models.gate_loop_lm import *
-from flax_gate_loop.language_models.transformer_lm import *
 from setups.get_setup_dict import get_setup_dict
-from util import get_home_directory
+from utils.util import get_home_directory
 import ast
 from datetime import datetime
 import wandb
+from gated_linear_rnn import GateLoopLM, GateLoopText2SpeechModel
+from gated_linear_rnn.language_models import TransformerLM
+
+
 
 def get_class_from_name(class_name):
     return globals()[class_name]

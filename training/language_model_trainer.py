@@ -15,7 +15,7 @@ class LanguageModelTrainer(BaseTrainer):
 
         def cross_entropy_batch_loss(params, step_rng, batch, training: bool):
             targets, inputs = batch
-            logits = self.model.apply(
+            hidden_states, logits = self.model.apply(
                 {'params': params}, inputs, training, rngs={'dropout': step_rng},
             )
             logits = jnp.reshape(logits, (-1, logits.shape[-1]))    # (batch_size * seq_length, vocab_size)
@@ -25,7 +25,7 @@ class LanguageModelTrainer(BaseTrainer):
 
         def cross_entropy_batch_loss_and_acc(params, batch, training: bool):
             targets, inputs = batch
-            logits = self.model.apply({'params': params}, inputs, training)
+            hidden_states, logits = self.model.apply({'params': params}, inputs, training)
             logits = jnp.reshape(logits, (-1, logits.shape[-1]))    # (batch_size * seq_length, vocab_size)
             targets = jnp.reshape(targets, (-1))                    # (batch_size * sequence_length)
             loss = cross_entropy_loss(logits, targets)

@@ -1,8 +1,8 @@
 from flax import linen as nn
 import jax.numpy as jnp
-from flax_gate_loop.base_models.sequence_model import SequenceModel
+from gated_linear_rnn.base_models.channel_mixing import ChannelMixing
 
-class LanguageModel(SequenceModel):
+class SequenceModel(nn.Module):
     n_layer: int
     d_model: int
     d_channel_mixing: int
@@ -15,8 +15,14 @@ class LanguageModel(SequenceModel):
     embedding_dropout: float
     use_word_embedding: bool
     positional_encoding_mode: str
+    use_head: bool
 
     def setup(self):
+        self.channel_mixing_layers = [ChannelMixing(
+            d_models=[self.d_model, self.d_channel_mixing, self.d_model],
+            dropout=self.channel_mixing_dropout,
+            eps=self.eps
+        ) for _ in range(self.n_layer)]
         if self.positional_encoding_mode == 'learned':
             self.wpe = nn.Embed(self.max_seq_length, self.d_model)
         elif self.positional_encoding_mode == 'sinusoidal':
@@ -25,34 +31,31 @@ class LanguageModel(SequenceModel):
             pass
         else:
             raise NotImplementedError
-        if self.input_vocab_size is None and self.use_word_embedding:
+        if self.input_vocab_size is None and self.use_word_embedding is True:
             raise AttributeError("self.input_vocab_size is None and self.use_word_embedding")
-        self.head = nn.Dense(self.output_vocab_size)
-        super().setup()
+        if self.use_head is True:
+            self.head = nn.Dense(self.output_vocab_size)
         self.embedding_dropout_function = nn.Dropout(rate=self.embedding_dropout)
         if self.use_word_embedding:
             self.input_function = nn.Embed(self.input_vocab_size, self.d_model)
         else:
             self.input_function = nn.Dense(self.d_model)
 
-
-    def __call__(self, x, training: bool):
-        """
-        :param      x           int       (batch_size, seq_len) or (batch_size, seq_len, input_dim)     required
-        :param      training    bool                                                                    optional
-        :return:    y           float     (batch_size, seq_len, d_model)
-        """
+    def __call__(self, x, training: bool, carry=None, mask=None):
         seq_length = x.shape[1]
-
         x = self.input_function(x)
-
         if self.positional_encoding_mode == 'sinusoidal' or self.positional_encoding_mode == 'learned':
             x = x + self.wpe(seq_length)
-
         x = self.embedding_dropout_function(x, deterministic=not training)
-        x = super().__call__(x, training)
-        x = self.head(x)
-        return x
+        h = []
+        for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
+            h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None), mask=mask)
+            x = channel_mixing(x, training)
+            h.append(h_l)
+        h = jnp.stack(h, axis=1)
+        if self.use_head is True:
+            x = self.head(x)
+        return h, x
 
 class SinusoidalPositionalEncoding(nn.Module):
     max_seq_length: int

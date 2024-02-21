@@ -1,7 +1,7 @@
 import os
 from flax.training import train_state
 from typing import Any, Sequence, Optional, Tuple, Iterator, Dict, Callable, List
-from flax_gate_loop.gate_loop import *
+from gated_linear_rnn.gated_linear_rnn import *
 
 
 def get_home_directory():
@@ -22,12 +22,6 @@ def is_unpackable(var):
     except TypeError:
         return False
 
-def get_class_from_name(class_name):
-    return globals()[class_name]
-
-def run_model_init(model, init_rng, exmp_input):
-    if is_unpackable(exmp_input):
-        return model.init(init_rng, *exmp_input, training=False)
-    else:
-        return model.init(init_rng, exmp_input, training=False)
+def run_model_init(model, init_rng, exmp_input_args, exmp_input_kwargs):
+    return model.init(init_rng, *exmp_input_args, training=False, **exmp_input_kwargs)
 
