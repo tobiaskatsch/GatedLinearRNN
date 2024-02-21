@@ -33,7 +33,7 @@ class MultiHeadSelfAttention(nn.Module):
         )
         self.out_proj = nn.Dense(self.d_model)
 
-    def __call__(self, x, mask=None):
+    def __call__(self, x, *args, mask=None, **kwargs):
         batch_size, seq_len, d_model = x.shape
 
         qkv = self.qkv_proj(x)
