@@ -51,8 +51,10 @@ class SequenceModel(nn.Module):
         for l, (time_mixing, channel_mixing) in enumerate(zip(self.time_mixing_layers, self.channel_mixing_layers)):
             h_l, x = time_mixing(x, training, carry=(carry[:, l, :] if carry is not None else None), mask=mask)
             x = channel_mixing(x, training)
-            h.append(h_l)
-        h = jnp.stack(h, axis=1)
+            if h_l is not None:
+                h.append(h_l)
+        if h:
+            h = jnp.stack(h, axis=1)
         if self.use_head is True:
             x = self.head(x)
         return h, x
