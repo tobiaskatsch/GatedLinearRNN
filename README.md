@@ -131,22 +131,18 @@ We provide 2 main modules:
 
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_1.wav" type="audio/wav">
-  Your browser does not support the audio tag.
 </audio>
 
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_2.wav" type="audio/wav">
-  Your browser does not support the audio tag.
 </audio>
 
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_3.wav" type="audio/wav">
-  Your browser does not support the audio tag.
 </audio>
 
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_4.wav" type="audio/wav">
-  Your browser does not support the audio tag.
 </audio>
 
 
