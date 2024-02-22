@@ -46,6 +46,3 @@ class GatedLinearRNNLM(SequenceModel):
                 )
             )
         self.time_mixing_layers = time_mixing_layers
-
-def is_even(number):
-    return number % 2 == 0
