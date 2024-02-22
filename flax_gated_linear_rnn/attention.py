@@ -53,7 +53,7 @@ class MultiHeadSelfAttention(nn.Module):
         output = output.transpose(0, 2, 1, 3)  # [Batch, SeqLen, Head, Dims]
         output = output.reshape(batch_size, seq_len, -1)
         output = self.out_proj(output)
-        return output
+        return None, output
 
 
 class MultiHeadCrossAttention(nn.Module):
