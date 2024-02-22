@@ -12,7 +12,7 @@
 
 ## About
 
-Linear Gated RNNs (Mamba, GateLoop, HGRN) are a novel class of sequence model which generalizes linear recurrent 
+Linear Gated RNNs (Mamba, GateLoop, HGRN) form a novel class of sequence models which generalize and generalize linear recurrent 
 models such as S4, S5, LRU and RetNet, by employing data-controlled state transitions. 
 While having a low cost linear complexity inference mode, they can be trained extremely 
 efficient in parallel with logarithmic complexity making use of the highly optimized JAX 
@@ -127,7 +127,7 @@ We provide 2 main modules:
   ```
   `carry` holds the hidden GatedLinearRNN model states for all layers which can be used for fast linear complexity autoregressive inference.
 
-## Synthetic speech generation examples:
+## Synthetic speech generation examples
 
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_1.wav" type="audio/wav">
