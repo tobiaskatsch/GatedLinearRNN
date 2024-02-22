@@ -129,6 +129,8 @@ We provide 2 main modules:
 
 ## Synthetic speech generation examples
 
+https://tobiaskatsch.github.io/GatedLinearRNN/
+
 <audio controls>
   <source src="https://tobiaskatsch.github.io/GatedLinearRNN/assets/generated_1.wav" type="audio/wav">
 </audio>
