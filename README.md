@@ -127,6 +127,29 @@ We provide 2 main modules:
   ```
   `carry` holds the hidden GatedLinearRNN model states for all layers which can be used for fast linear complexity autoregressive inference.
 
+## Synthetic speech generation examples:
+
+<audio controls>
+  <source src="assets/generated_1.wav" type="audio/wav">
+  Your browser does not support the audio tag.
+</audio>
+
+<audio controls>
+  <source src="assets/generated_2.wav" type="audio/wav">
+  Your browser does not support the audio tag.
+</audio>
+
+<audio controls>
+  <source src="assets/generated_3.wav" type="audio/wav">
+  Your browser does not support the audio tag.
+</audio>
+
+<audio controls>
+  <source src="assets/generated_4.wav" type="audio/wav">
+  Your browser does not support the audio tag.
+</audio>
+
+
 ## Citation
 
 If you use this codebase, please cite:
