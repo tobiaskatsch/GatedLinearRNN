@@ -153,8 +153,8 @@ https://tobiaskatsch.github.io/GatedLinearRNN/
 
 If you use this codebase, please cite:
 ```
-@misc{katsch2024GatedLinearRNN,
-      title={GatedLinearRNN: Fully Data-Controlled Linear Recurrence for Sequence Modeling}, 
+@misc{katsch2024GateLoop,
+      title={GateLoop: Fully Data-Controlled Linear Recurrence for Sequence Modeling}, 
       author={Tobias Katsch},
       year={2024},
       eprint={2311.01927},
